@@ -1,0 +1,41 @@
+# Lefthook configuration for git hooks
+# https://github.com/evilmartians/lefthook
+
+pre-commit:
+  parallel: true
+  commands:
+    # Lint staged files
+    lint:
+      glob: "*.{js,jsx,ts,tsx}"
+      run: pnpm eslint {staged_files} --fix
+      stage_fixed: true
+    
+    # Format staged files
+    format:
+      glob: "*.{js,jsx,ts,tsx,json,md}"
+      run: pnpm prettier --write {staged_files}
+      stage_fixed: true
+    
+    # Type check
+    type-check:
+      run: pnpm type-check
+    
+    # Test related files
+    test:
+      glob: "*.{js,jsx,ts,tsx}"
+      run: pnpm test --bail
+
+commit-msg:
+  commands:
+    commitlint:
+      run: npx commitlint --edit {1}
+
+pre-push:
+  commands:
+    # Run full test suite before push
+    test:
+      run: pnpm test
+    
+    # Final quality check
+    quality-check:
+      run: pnpm quality

@@ -155,6 +155,14 @@ export default tseslint.config(
     },
   },
   
+  // Configuration for App.tsx (development/testing) - MUST BE AFTER MAIN CONFIG
+  {
+    files: ['App.tsx', 'App.jsx'],
+    rules: {
+      'no-console': 'off', // Allow console.log in main App file for testing
+    },
+  },
+  
   // Configuration for JavaScript files
   {
     files: ['**/*.{js,jsx}'],
@@ -214,6 +222,14 @@ export default tseslint.config(
       react: {
         version: 'detect',
       },
+    },
+  },
+  
+  // Override for jest.setup.js specifically - MUST BE LAST
+  {
+    files: ['jest.setup.js'],
+    rules: {
+      'no-console': 'off',
     },
   },
 );

@@ -5,8 +5,21 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        // Material Design 3 - Light theme
-        primary: '#6750A4',
+        // New Design System - Purple Theme (from wireframe)
+        primary: '#7B5FFF',
+        'primary-dark': '#6347E8',
+        secondary: '#FF6B9D',
+        accent: '#FFB800',
+        background: '#F5F5F5',
+        'card-light': '#F8F7FF',
+        'card-purple': '#E8E1FF',
+        'card-pink': '#FFE1EE',
+        'card-blue': '#D4E7FF',
+        'text-primary': '#1A1A1A',
+        'text-secondary': '#6B7280',
+        'text-light': '#9CA3AF',
+
+        // Material Design 3 - Light theme (legacy compatibility)
         'on-primary': '#FFFFFF',
         'primary-container': '#EADDFF',
         'on-primary-container': '#21005D',
@@ -26,7 +39,6 @@ module.exports = {
         'error-container': '#F9DEDC',
         'on-error-container': '#410E0B',
 
-        background: '#FFFBFE',
         'on-background': '#1C1B1F',
 
         surface: '#FFFBFE',

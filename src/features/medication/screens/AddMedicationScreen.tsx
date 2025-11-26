@@ -11,124 +11,151 @@ type NavigationProp = StackNavigationProp<MedicationStackParamList, 'AddMedicati
 
 export function AddMedicationScreen() {
   const navigation = useNavigation<NavigationProp>();
-  const [medicineName, setMedicineName] = useState('Loratadine, 10mg');
-  const [whenToTake] = useState('Before Eatting');
-  const [beginDate] = useState('Oct 2');
-  const [finishDate] = useState('Oct 9');
+  const [pillName, setPillName] = useState('');
+  const [dose, _setDose] = useState('0.5');
+  const [shape, _setShape] = useState('pill');
+  const [time, _setTime] = useState({ hour: '11', minute: '30', period: 'AM' });
+  const [howToUse, _setHowToUse] = useState({ days: '07', timing: 'Before eat' });
 
-  const dates = [
-    { day: 28, label: 'Mon' },
-    { day: 29, label: 'Tue', selected: true },
-    { day: 29, label: 'Wed' },
-    { day: 29, label: 'Thu' },
-  ];
+  const handleAddMedicine = () => {
+    const medicationData = {
+      pillName,
+      dose,
+      shape,
+      time: `${time.hour}:${time.minute} ${time.period}`,
+      howToUse: `${howToUse.days} days ${howToUse.timing}`,
+    };
+
+    // eslint-disable-next-line no-console
+    console.log('New medication:', medicationData);
+    navigation.goBack();
+  };
 
   return (
-    <ScrollView className='flex-1 bg-gray-50'>
-      {/* Header com botão voltar */}
-      <View className='px-6 pt-12 pb-4'>
-        <TouchableOpacity onPress={() => navigation.goBack()} className='mb-4'>
-          <MaterialIcons name='arrow-back' size={24} color='#1C1B1F' />
-        </TouchableOpacity>
-      </View>
+    <View className='flex-1 bg-gradient-to-br from-pink-200 via-purple-200 to-blue-200'>
+      <ScrollView className='flex-1'>
+        {/* Header */}
+        <View className='bg-white rounded-b-[40px] px-6 pt-14 pb-6'>
+          <View className='flex-row justify-between items-center mb-6'>
+            <TouchableOpacity onPress={() => navigation.goBack()}>
+              <MaterialIcons name='arrow-back' size={24} color='#1A1A1A' />
+            </TouchableOpacity>
+            <Text className='text-2xl font-bold text-primary'>Add Medicine</Text>
+            <TouchableOpacity className='p-2'>
+              <MaterialIcons name='menu' size={24} color='#1A1A1A' />
+            </TouchableOpacity>
+          </View>
 
-      <View className='px-6 pb-8'>
-        {/* Header Icon */}
-        <View className='items-center mb-8'>
-          <View className='relative'>
-            <View className='w-32 h-32 rounded-full bg-primary/20 items-center justify-center'>
-              <View className='w-24 h-24 rounded-full bg-primary items-center justify-center'>
-                <MaterialIcons name='medical-services' size={48} color='white' />
+          {/* Pill Icon */}
+          <View className='items-center mt-4 mb-6'>
+            <View className='relative'>
+              {/* Decorative circles */}
+              <View className='absolute -top-2 -right-2 w-12 h-12 rounded-full bg-yellow-200 opacity-50' />
+              <View className='absolute -bottom-2 -left-3 w-16 h-16 rounded-full bg-pink-200 opacity-50' />
+
+              {/* Main pill icon */}
+              <View className='w-24 h-24 bg-gradient-to-br from-purple-400 to-purple-600 rounded-3xl items-center justify-center rotate-12 shadow-lg'>
+                <Text className='text-4xl'>💊</Text>
               </View>
             </View>
-            {/* Decorative circles */}
-            <View className='absolute -top-4 -right-4 w-16 h-16 rounded-full bg-blue-200/50' />
-            <View className='absolute -bottom-2 -left-6 w-20 h-20 rounded-full bg-yellow-200/50' />
           </View>
         </View>
 
         {/* Form */}
-        <View className='gap-4'>
-          {/* Medicine Name */}
+        <View className='px-6 pt-6 gap-5'>
+          {/* Pill Name */}
           <View>
-            <Text className='text-sm text-gray-600 mb-2'>Medicine Name</Text>
+            <Text className='text-sm font-medium text-text-primary mb-2'>Pill name</Text>
             <Input
-              value={medicineName}
-              onChangeText={setMedicineName}
-              placeholder='Enter medicine name'
+              value={pillName}
+              onChangeText={setPillName}
+              placeholder='Enter the pill name'
+              className='bg-white'
             />
           </View>
 
-          {/* When to take */}
-          <View>
-            <Text className='text-sm text-gray-600 mb-2'>When to take</Text>
-            <TouchableOpacity className='bg-white border border-gray-300 rounded-lg p-3 flex-row justify-between items-center'>
-              <Text className='text-gray-900'>{whenToTake}</Text>
-              <MaterialIcons name='keyboard-arrow-down' size={24} color='#666' />
-            </TouchableOpacity>
-          </View>
-
-          {/* Date Range */}
+          {/* Dose and Shape Row */}
           <View className='flex-row gap-3'>
+            {/* Dose */}
             <View className='flex-1'>
-              <Text className='text-sm text-gray-600 mb-2'>Begin</Text>
-              <TouchableOpacity className='bg-white border border-gray-300 rounded-lg p-3 flex-row justify-between items-center'>
-                <Text className='text-gray-900'>{beginDate}</Text>
-                <MaterialIcons name='keyboard-arrow-down' size={24} color='#666' />
+              <Text className='text-sm font-medium text-text-primary mb-2'>dose</Text>
+              <TouchableOpacity className='bg-white rounded-xl px-4 py-4 flex-row items-center justify-between border border-gray-200'>
+                <Text className='text-text-primary font-medium'>{dose}</Text>
+                <MaterialIcons name='expand-more' size={24} color='#6B7280' />
               </TouchableOpacity>
             </View>
+
+            {/* Shape */}
             <View className='flex-1'>
-              <Text className='text-sm text-gray-600 mb-2'>Finish</Text>
-              <TouchableOpacity className='bg-white border border-gray-300 rounded-lg p-3 flex-row justify-between items-center'>
-                <Text className='text-gray-900'>{finishDate}</Text>
-                <MaterialIcons name='keyboard-arrow-down' size={24} color='#666' />
+              <Text className='text-sm font-medium text-text-primary mb-2'>shape</Text>
+              <TouchableOpacity className='bg-white rounded-xl px-4 py-4 flex-row items-center justify-between border border-gray-200'>
+                <View className='flex-row items-center gap-2'>
+                  <MaterialIcons name='medication' size={20} color='#7B5FFF' />
+                  <Text className='text-text-primary font-medium capitalize'>{shape}</Text>
+                </View>
+                <MaterialIcons name='expand-more' size={24} color='#6B7280' />
               </TouchableOpacity>
             </View>
           </View>
 
-          {/* Reminder Section */}
+          {/* Time */}
           <View>
-            <Text className='text-lg font-bold text-gray-900 mb-3'>Reminder</Text>
+            <Text className='text-sm font-medium text-text-primary mb-2'>Time</Text>
+            <View className='bg-white rounded-xl p-4 flex-row items-center justify-between border border-gray-200'>
+              {/* Hour */}
+              <TouchableOpacity className='flex-1 items-center'>
+                <Text className='text-3xl font-bold text-text-primary'>{time.hour}</Text>
+              </TouchableOpacity>
 
-            {/* Date Selector */}
-            <View className='flex-row justify-between gap-2 mb-4'>
-              {dates.map((date, index) => (
-                <TouchableOpacity
-                  key={index}
-                  className={`flex-1 items-center py-3 rounded-full ${
-                    date.selected ? 'bg-primary' : 'bg-white border border-gray-200'
-                  }`}
-                >
-                  <Text
-                    className={`text-xl font-bold ${
-                      date.selected ? 'text-white' : 'text-gray-900'
-                    }`}
-                  >
-                    {date.day}
-                  </Text>
-                  <Text className={`text-xs ${date.selected ? 'text-white' : 'text-gray-500'}`}>
-                    {date.label}
-                  </Text>
-                </TouchableOpacity>
-              ))}
+              <Text className='text-3xl font-bold text-text-primary'>:</Text>
+
+              {/* Minute */}
+              <TouchableOpacity className='flex-1 items-center'>
+                <Text className='text-3xl font-bold text-text-primary'>{time.minute}</Text>
+              </TouchableOpacity>
+
+              {/* AM/PM */}
+              <TouchableOpacity className='ml-4 bg-gray-100 rounded-lg px-4 py-2'>
+                <Text className='text-lg font-semibold text-text-primary'>{time.period}</Text>
+              </TouchableOpacity>
             </View>
           </View>
 
-          {/* Action Buttons */}
-          <View className='flex-row gap-3 mt-4'>
-            <TouchableOpacity className='flex-1 bg-white border border-gray-300 rounded-full py-4 items-center'>
-              <Text className='text-gray-900 font-medium'>Cycle</Text>
-            </TouchableOpacity>
-            <View className='flex-1'>
-              <Button
-                title='Get Started'
-                variant='primary'
-                onPress={() => console.log('Get Started')}
-              />
+          {/* How to use */}
+          <View>
+            <Text className='text-sm font-medium text-text-primary mb-2'>How to use</Text>
+            <View className='flex-row gap-3'>
+              {/* Days */}
+              <View className='flex-1'>
+                <Text className='text-xs text-text-secondary mb-2'>days</Text>
+                <TouchableOpacity className='bg-white rounded-xl px-4 py-4 flex-row items-center justify-between border border-gray-200'>
+                  <Text className='text-text-primary font-medium'>{howToUse.days}</Text>
+                  <MaterialIcons name='expand-more' size={24} color='#6B7280' />
+                </TouchableOpacity>
+              </View>
+
+              {/* Before/After eat */}
+              <View className='flex-1'>
+                <Text className='text-xs text-text-secondary mb-2'>timing</Text>
+                <TouchableOpacity className='bg-white rounded-xl px-4 py-4 flex-row items-center justify-between border border-gray-200'>
+                  <Text className='text-text-primary font-medium'>{howToUse.timing}</Text>
+                  <MaterialIcons name='expand-more' size={24} color='#6B7280' />
+                </TouchableOpacity>
+              </View>
             </View>
+          </View>
+
+          {/* Add Medicine Button */}
+          <View className='mt-6 mb-8'>
+            <Button
+              title='Add Medicine'
+              variant='primary'
+              onPress={handleAddMedicine}
+              className='bg-primary py-5 rounded-full'
+            />
           </View>
         </View>
-      </View>
-    </ScrollView>
+      </ScrollView>
+    </View>
   );
 }

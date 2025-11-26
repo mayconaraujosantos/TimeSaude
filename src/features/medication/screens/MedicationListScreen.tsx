@@ -10,8 +10,9 @@ type NavigationProp = StackNavigationProp<MedicationStackParamList, 'MedicationL
 export function MedicationListScreen() {
   const navigation = useNavigation<NavigationProp>();
 
-  const handleDateSelect = (date: DateItem) => {
-    console.log('Selected date:', date);
+  const handleDateSelect = (_date: DateItem) => {
+    // Handle date selection - filter medications by selected date
+    // TODO: Implement medication filtering logic
   };
 
   const upcomingDoses = [

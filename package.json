@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "Medication Reminder App - Remedi inspired",
   "main": "index.ts",
-  "packageManager": "pnpm@9.14.4",
+  "packageManager": "pnpm@10.23.0+sha512.21c4e5698002ade97e4efe8b8b4a89a8de3c85a37919f957e7a0f30f38fbc5bbdd05980ffe29179b2fb6e6e691242e098d945d1601772cad0fef5fb6411e2a4b",
   "scripts": {
     "start": "expo start",
     "android": "expo run:android",
@@ -37,6 +37,7 @@
     "expo-crypto": "~15.0.7",
     "expo-dev-client": "~6.0.18",
     "expo-font": "~14.0.9",
+    "expo-linear-gradient": "^15.0.7",
     "expo-location": "~19.0.7",
     "expo-notifications": "~0.32.13",
     "expo-sqlite": "~16.0.9",
@@ -86,8 +87,20 @@
   },
   "jest": {
     "preset": "jest-expo",
+    "setupFilesAfterEnv": [
+      "<rootDir>/jest.setup.js"
+    ],
     "transformIgnorePatterns": [
-      "node_modules/(?!((jest-)?react-native|@react-native(-community)?)|expo(nent)?|@expo(nent)?/.*|@expo-google-fonts/.*|react-navigation|@react-navigation/.*|@sentry/react-native|native-base|react-native-svg)"
+      "node_modules/(?!((jest-)?react-native|@react-native(-community)?)|expo(nent)?|@expo(nent)?/.*|@expo-google-fonts/.*|react-navigation|@react-navigation/.*|@sentry/react-native|native-base|react-native-svg|nativewind)"
+    ],
+    "moduleNameMapper": {
+      "^@/(.*)$": "<rootDir>/src/$1"
+    },
+    "collectCoverageFrom": [
+      "src/**/*.{ts,tsx}",
+      "!src/**/*.d.ts",
+      "!src/**/__tests__/**",
+      "!src/**/index.ts"
     ]
   },
   "pnpm": {

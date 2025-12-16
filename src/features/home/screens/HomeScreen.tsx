@@ -1,18 +1,106 @@
-import { View, Text, ScrollView, TouchableOpacity } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, Modal, Alert, Image, Platform } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
-import { StackNavigationProp } from '@react-navigation/stack';
-import { MedicationStackParamList } from '@/app/navigation/MedicationNavigator';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { MedicationStackParamList } from '@/navigation_stack/navigation/MedicationNavigator';
 import { LinearGradient } from 'expo-linear-gradient';
+import { useMedications } from '@/features/medication/hooks/useMedications';
+import { useAppointments } from '@/features/appointment/hooks/useAppointments';
+import { useAuth } from '@/shared/contexts/AuthContext';
+import { useState, useEffect, useRef } from 'react';
+import type { Medication } from '@/features/medication/model';
+import type { Appointment } from '@/features/appointment/model';
+import type { NativeScrollEvent, NativeSyntheticEvent } from 'react-native';
 
-type NavigationProp = StackNavigationProp<MedicationStackParamList>;
+type NavigationProp = NativeStackNavigationProp<MedicationStackParamList>;
 
 export function HomeScreen() {
   const navigation = useNavigation<NavigationProp>();
+  const { medications, isOfflineMode, deleteMedication } = useMedications();
+  const { getUpcomingAppointments } = useAppointments();
+  const { logout, user } = useAuth();
+
+  const [menuVisible, setMenuVisible] = useState(false);
+  const [nextAppointment, setNextAppointment] = useState<Appointment | null>(null);
+  const [currentCabinetIndex, setCurrentCabinetIndex] = useState(0);
+  const cabinetScrollRef = useRef<ScrollView>(null);
+
+  // Mostra até 6 medicamentos no cabinet (scroll horizontal)
+  const cabinetMedications = medications.slice(0, 6);
+
+  // Pega o próximo medicamento (primeiro da lista)
+  const nextMedication = medications[0];
+
+  const handleCabinetScroll = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
+    const scrollPosition = event.nativeEvent.contentOffset.x;
+    const cardWidth = 196; // 180px width + 16px gap
+    const index = Math.round(scrollPosition / cardWidth);
+    setCurrentCabinetIndex(index);
+  };
+
+  const handleDeleteMedication = (med: Medication) => {
+    Alert.alert(
+      'Excluir Medicamento',
+      `Tem certeza que deseja excluir ${med.name}?`,
+      [
+        { text: 'Cancelar', style: 'cancel' },
+        {
+          text: 'Excluir',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              await deleteMedication(med.id);
+            } catch (error) {
+              Alert.alert('Erro', 'Não foi possível excluir o medicamento');
+            }
+          },
+        },
+      ]
+    );
+  };
+
+  const openMedicationOptions = (med: Medication) => {
+    Alert.alert(
+      med.name,
+      'Escolha uma ação',
+      [
+        {
+          text: 'Ver detalhes',
+          onPress: () => navigation.navigate('MedicationList'),
+        },
+        {
+          text: 'Excluir',
+          style: 'destructive',
+          onPress: () => handleDeleteMedication(med),
+        },
+        { text: 'Cancelar', style: 'cancel' },
+      ]
+    );
+  };
+
+  useEffect(() => {
+    const loadNextAppointment = async () => {
+      const upcoming = await getUpcomingAppointments();
+      if (upcoming.length > 0) {
+        setNextAppointment(upcoming[0] || null);
+      }
+    };
+    loadNextAppointment();
+  }, [getUpcomingAppointments]);
 
   return (
     <View className='flex-1' style={{ backgroundColor: '#F0EBFF' }}>
-      <ScrollView className='flex-1' showsVerticalScrollIndicator={false}>
+      {/* Offline Mode Banner */}
+      {isOfflineMode && (
+        <View className='bg-amber-500 px-4 py-2 flex-row items-center justify-center'>
+          <MaterialIcons name='cloud-off' size={18} color='white' />
+          <Text className='text-white font-semibold ml-2 text-sm'>
+            Modo Offline - Dados de Exemplo
+          </Text>
+        </View>
+      )}
+
+      <ScrollView className='flex-1'>
         {/* Header */}
         <View className='bg-white/60 backdrop-blur-xl rounded-b-[40px] px-6 pt-16 pb-6 mb-6'>
           <View className='flex-row justify-between items-start'>
@@ -24,18 +112,29 @@ export function HomeScreen() {
                 end={{ x: 1, y: 1 }}
                 className='w-14 h-14 rounded-full items-center justify-center'
               >
-                <Text className='text-2xl'>👩</Text>
+                {user?.profileImage ? (
+                  <Image
+                    source={{ uri: user.profileImage }}
+                    className='w-14 h-14 rounded-full'
+                    style={{ width: 56, height: 56, borderRadius: 28 }}
+                  />
+                ) : (
+                  <Text className='text-2xl'>👩</Text>
+                )}
               </LinearGradient>
               <View>
                 <Text className='text-2xl font-bold' style={{ color: '#1A1A1A' }}>
-                  Hi Ana!
+                  Hi {user?.name?.split(' ')[0] || 'Ana'}!
                 </Text>
                 <Text className='text-sm' style={{ color: '#6B7280' }}>
                   How do you feel today?
                 </Text>
               </View>
             </View>
-            <TouchableOpacity className='p-2'>
+            <TouchableOpacity
+              className='p-2'
+              onPress={() => setMenuVisible(true)}
+            >
               <MaterialIcons name='menu' size={28} color='#7B5FFF' />
             </TouchableOpacity>
           </View>
@@ -45,193 +144,340 @@ export function HomeScreen() {
           {/* Your Next Pill */}
           <View>
             <Text className='text-xs mb-2' style={{ color: '#9CA3AF' }}>
-              22 June
+              {new Date().toLocaleDateString('pt-BR', { day: '2-digit', month: 'long' })}
             </Text>
             <Text className='text-xl font-bold mb-4' style={{ color: '#1A1A1A' }}>
               Your Next Pill
             </Text>
 
-            <View
-              className='rounded-[32px] p-5 flex-row items-center justify-between'
-              style={{
-                backgroundColor: '#E8E1FF',
-                shadowColor: '#7B5FFF',
-                shadowOffset: { width: 0, height: 8 },
-                shadowOpacity: 0.15,
-                shadowRadius: 16,
-                elevation: 8,
-              }}
-            >
-              <View className='flex-row items-center gap-4 flex-1'>
-                <View
-                  className='w-14 h-14 rounded-[20px] items-center justify-center'
-                  style={{ backgroundColor: '#FFFFFF' }}
+            {nextMedication ? (
+              <View
+                className='rounded-[32px] p-5 flex-row items-center justify-between'
+                style={{
+                  backgroundColor: '#E8E1FF',
+                  borderRadius: 32,
+                  borderWidth: 1,
+                  borderColor: 'rgba(123, 95, 255, 0.15)',
+                  ...Platform.select({
+                    ios: {
+                      shadowColor: '#7B5FFF',
+                      shadowOffset: { width: 0, height: 2 },
+                      shadowOpacity: 0.1,
+                      shadowRadius: 8,
+                    },
+                    android: {
+                      elevation: 2,
+                    },
+                  }),
+                }}
+              >
+                <View className='flex-row items-center gap-4 flex-1'>
+                  <View
+                    className='w-14 h-14 rounded-[20px] items-center justify-center'
+                    style={{ backgroundColor: '#FFFFFF', borderRadius: 20 }}
+                  >
+                    <Text className='text-3xl'>💊</Text>
+                  </View>
+                  <View className='flex-1'>
+                    <Text className='text-lg font-bold' style={{ color: '#1A1A1A' }}>
+                      {nextMedication.name}
+                    </Text>
+                    <Text className='text-sm' style={{ color: '#6B7280' }}>
+                      {nextMedication.dosage} • {nextMedication.frequency}
+                    </Text>
+                  </View>
+                </View>
+                <TouchableOpacity
+                  className='p-2'
+                  onPress={() => openMedicationOptions(nextMedication)}
                 >
-                  <Text className='text-3xl'>💊</Text>
-                </View>
-                <View className='flex-1'>
-                  <Text className='text-lg font-bold' style={{ color: '#1A1A1A' }}>
-                    Omega 3
-                  </Text>
-                  <Text className='text-sm' style={{ color: '#6B7280' }}>
-                    1 Pill take before eat
-                  </Text>
-                </View>
+                  <MaterialIcons name='more-vert' size={24} color='#6B7280' />
+                </TouchableOpacity>
               </View>
-              <TouchableOpacity className='p-2'>
-                <MaterialIcons name='more-vert' size={24} color='#6B7280' />
-              </TouchableOpacity>
-            </View>
+            ) : (
+              <View
+                className='rounded-[32px] p-5'
+                style={{
+                  backgroundColor: '#F3F4F6',
+                  borderWidth: 2,
+                  borderColor: '#E5E7EB',
+                  borderStyle: 'dashed',
+                }}
+              >
+                <Text className='text-center text-sm' style={{ color: '#9CA3AF' }}>
+                  Nenhum medicamento cadastrado
+                </Text>
+                <TouchableOpacity
+                  className='mt-3 py-2'
+                  onPress={() => navigation.navigate('AddMedication')}
+                >
+                  <Text className='text-center font-medium' style={{ color: '#7B5FFF' }}>
+                    Adicionar medicamento
+                  </Text>
+                </TouchableOpacity>
+              </View>
+            )}
           </View>
 
           {/* Your Next Appointment */}
           <View>
-            <Text className='text-xl font-bold mb-4' style={{ color: '#1A1A1A' }}>
-              Your Next Appointment
-            </Text>
-
-            <View
-              className='rounded-[32px] p-5 flex-row items-center justify-between'
-              style={{
-                backgroundColor: '#D4E7FF',
-                shadowColor: '#7B5FFF',
-                shadowOffset: { width: 0, height: 8 },
-                shadowOpacity: 0.12,
-                shadowRadius: 16,
-                elevation: 6,
-              }}
-            >
-              <View className='flex-row items-center gap-4 flex-1'>
-                <View
-                  className='w-14 h-14 rounded-[20px] items-center justify-center'
-                  style={{ backgroundColor: '#FFFFFF' }}
-                >
-                  <MaterialIcons name='event-note' size={28} color='#7B5FFF' />
-                </View>
-                <View className='flex-1'>
-                  <Text className='text-lg font-bold' style={{ color: '#1A1A1A' }}>
-                    Mammogram
-                  </Text>
-                  <Text className='text-sm' style={{ color: '#6B7280' }}>
-                    Schedule the test
-                  </Text>
-                </View>
-              </View>
-              <View className='items-end'>
-                <Text className='text-base font-bold' style={{ color: '#1A1A1A' }}>
-                  1 July
-                </Text>
-                <Text className='text-sm' style={{ color: '#6B7280' }}>
-                  10 am
-                </Text>
-              </View>
-            </View>
-          </View>
-
-          {/* Your Cabinet */}
-          <View>
             <View className='flex-row justify-between items-center mb-4'>
               <Text className='text-xl font-bold' style={{ color: '#1A1A1A' }}>
-                Your Cabinet
+                Your Next Appointment
               </Text>
-              <TouchableOpacity className='flex-row items-center gap-1'>
+              <TouchableOpacity
+                className='flex-row items-center gap-1'
+                onPress={() => navigation.navigate('AppointmentList')}
+              >
                 <Text className='text-sm font-medium' style={{ color: '#7B5FFF' }}>
-                  View all
+                  Ver todas
                 </Text>
                 <MaterialIcons name='arrow-forward' size={16} color='#7B5FFF' />
               </TouchableOpacity>
             </View>
 
-            <View className='flex-row gap-4'>
-              {/* Vitamin A Card */}
+            {nextAppointment ? (
               <View
-                className='flex-1 rounded-[32px] p-5'
+                className='rounded-[32px] p-5 flex-row items-center justify-between'
                 style={{
-                  backgroundColor: '#E8E1FF',
-                  shadowColor: '#7B5FFF',
-                  shadowOffset: { width: 0, height: 4 },
-                  shadowOpacity: 0.1,
-                  shadowRadius: 12,
-                  elevation: 4,
+                  backgroundColor: '#D4E7FF',
+                  borderRadius: 32,
+                  borderWidth: 1,
+                  borderColor: 'rgba(123, 95, 255, 0.15)',
+                  ...Platform.select({
+                    ios: {
+                      shadowColor: '#7B5FFF',
+                      shadowOffset: { width: 0, height: 2 },
+                      shadowOpacity: 0.1,
+                      shadowRadius: 8,
+                    },
+                    android: {
+                      elevation: 2,
+                    },
+                  }),
                 }}
               >
-                <View className='flex-row justify-between items-start mb-4'>
+                <View className='flex-row items-center gap-4 flex-1'>
                   <View
-                    className='w-12 h-12 rounded-[16px] items-center justify-center'
-                    style={{ backgroundColor: '#FFFFFF' }}
+                    className='w-14 h-14 rounded-[20px] items-center justify-center'
+                    style={{ backgroundColor: '#FFFFFF', borderRadius: 20 }}
                   >
-                    <Text className='text-2xl'>💊</Text>
+                    <MaterialIcons name='event-note' size={28} color='#7B5FFF' />
                   </View>
-                  <TouchableOpacity className='p-1'>
-                    <MaterialIcons name='more-vert' size={20} color='#6B7280' />
-                  </TouchableOpacity>
+                  <View className='flex-1'>
+                    <Text className='text-lg font-bold' style={{ color: '#1A1A1A' }}>
+                      {nextAppointment.title}
+                    </Text>
+                    <Text className='text-sm' style={{ color: '#6B7280' }}>
+                      {nextAppointment.description || nextAppointment.location}
+                    </Text>
+                  </View>
                 </View>
-                <Text className='text-base font-bold mb-1' style={{ color: '#1A1A1A' }}>
-                  Vitamin A
-                </Text>
-                <Text className='text-xs mb-2' style={{ color: '#6B7280' }}>
-                  40 pills
-                </Text>
-                <Text className='text-xs' style={{ color: '#9CA3AF' }}>
-                  take before eat
-                </Text>
+                <View className='items-end'>
+                  <Text className='text-base font-bold' style={{ color: '#1A1A1A' }}>
+                    {new Date(nextAppointment.date).toLocaleDateString('pt-BR', { day: 'numeric', month: 'short' })}
+                  </Text>
+                  <Text className='text-sm' style={{ color: '#6B7280' }}>
+                    {nextAppointment.time}
+                  </Text>
+                </View>
               </View>
+            ) : (
+              <View
+                className='rounded-[32px] p-5'
+                style={{
+                  backgroundColor: '#F3F4F6',
+                  borderWidth: 2,
+                  borderColor: '#E5E7EB',
+                  borderStyle: 'dashed',
+                }}
+              >
+                <Text className='text-center text-sm mb-3' style={{ color: '#9CA3AF' }}>
+                  Nenhuma consulta agendada
+                </Text>
+                <TouchableOpacity
+                  className='py-2'
+                  onPress={() => navigation.navigate('AddAppointment')}
+                >
+                  <Text className='text-center font-medium' style={{ color: '#7B5FFF' }}>
+                    Agendar consulta
+                  </Text>
+                </TouchableOpacity>
+              </View>
+            )}
+          </View>
 
-              {/* Dimeticone Card */}
-              <View
-                className='flex-1 rounded-[32px] p-5'
-                style={{
-                  backgroundColor: '#FFE1EE',
-                  shadowColor: '#FF6B9D',
-                  shadowOffset: { width: 0, height: 4 },
-                  shadowOpacity: 0.1,
-                  shadowRadius: 12,
-                  elevation: 4,
-                }}
+          {/* Your Cabinet */}
+          <View className='mb-6'>
+            <View className='flex-row justify-between items-center mb-4'>
+              <Text className='text-xl font-bold' style={{ color: '#1A1A1A' }}>
+                Your Cabinet
+              </Text>
+              <TouchableOpacity
+                className='flex-row items-center gap-1'
+                onPress={() => navigation.navigate('MedicationList')}
               >
-                <View className='flex-row justify-between items-start mb-4'>
+                <Text className='text-sm font-medium' style={{ color: '#7B5FFF' }}>
+                  View all ({medications.length})
+                </Text>
+                <MaterialIcons name='arrow-forward' size={16} color='#7B5FFF' />
+              </TouchableOpacity>
+            </View>
+
+            {/* Scroll Horizontal para mostrar mais medicamentos */}
+            <View style={{ position: 'relative' }}>
+              <ScrollView
+                ref={cabinetScrollRef}
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                contentContainerStyle={{ gap: 16, paddingRight: 24, paddingBottom: 20 }}
+                snapToInterval={196} // 180px width + 16px gap
+                decelerationRate="fast"
+                onScroll={handleCabinetScroll}
+                scrollEventThrottle={16}
+              >
+                {cabinetMedications.length > 0 ? (
+                  cabinetMedications.map((med, index) => (
+                    <View
+                      key={med.id}
+                      className='rounded-[32px] p-5'
+                      style={{
+                        width: 180,
+                        backgroundColor: index % 2 === 0 ? '#E8E1FF' : '#FFE1EE',
+                        borderRadius: 32,
+                        borderWidth: 1,
+                        borderColor: index % 2 === 0 ? 'rgba(123, 95, 255, 0.15)' : 'rgba(255, 107, 157, 0.15)',
+                        ...Platform.select({
+                          ios: {
+                            shadowColor: index % 2 === 0 ? '#7B5FFF' : '#FF6B9D',
+                            shadowOffset: { width: 0, height: 2 },
+                            shadowOpacity: 0.08,
+                            shadowRadius: 6,
+                          },
+                          android: {
+                            elevation: 2,
+                          },
+                        }),
+                      }}
+                    >
+                      <View className='flex-row justify-between items-start mb-4'>
+                        <View
+                          className='w-12 h-12 rounded-[16px] items-center justify-center'
+                          style={{ backgroundColor: '#FFFFFF', borderRadius: 16 }}
+                        >
+                          <Text className='text-2xl'>💊</Text>
+                        </View>
+                        <TouchableOpacity
+                          className='p-1'
+                          onPress={() => openMedicationOptions(med)}
+                        >
+                          <MaterialIcons name='more-vert' size={20} color='#6B7280' />
+                        </TouchableOpacity>
+                      </View>
+                      <Text className='text-base font-bold mb-1' style={{ color: '#1A1A1A' }} numberOfLines={1}>
+                        {med.name}
+                      </Text>
+                      <Text className='text-xs mb-2' style={{ color: '#6B7280' }}>
+                        {med.dosage}
+                      </Text>
+                      <Text className='text-xs' style={{ color: '#9CA3AF' }}>
+                        {med.frequency}
+                      </Text>
+                    </View>
+                  ))
+                ) : (
                   <View
-                    className='w-12 h-12 rounded-[16px] items-center justify-center'
-                    style={{ backgroundColor: '#FFFFFF' }}
+                    className='rounded-[32px] p-5'
+                    style={{
+                      width: 180,
+                      backgroundColor: '#F3F4F6',
+                      borderWidth: 2,
+                      borderColor: '#E5E7EB',
+                      borderStyle: 'dashed',
+                    }}
                   >
-                    <Text className='text-2xl'>💊</Text>
+                    <Text className='text-center text-sm' style={{ color: '#9CA3AF' }}>
+                      Seu armário está vazio
+                    </Text>
                   </View>
-                  <TouchableOpacity className='p-1'>
-                    <MaterialIcons name='more-vert' size={20} color='#6B7280' />
-                  </TouchableOpacity>
-                </View>
-                <Text className='text-base font-bold mb-1' style={{ color: '#1A1A1A' }}>
-                  Dimeticone
-                </Text>
-                <Text className='text-xs mb-2' style={{ color: '#6B7280' }}>
-                  25 pills
-                </Text>
-                <Text className='text-xs' style={{ color: '#9CA3AF' }}>
-                  take After Lunch
-                </Text>
-              </View>
+                )}
+              </ScrollView>
+
+              {/* Gradiente na direita para indicar mais conteúdo */}
+              {
+                cabinetMedications.length > 1 && currentCabinetIndex < cabinetMedications.length - 1 && (
+                  <LinearGradient
+                    colors={['transparent', 'rgba(240, 235, 255, 0.9)']}
+                    start={{ x: 0, y: 0 }}
+                    end={{ x: 1, y: 0 }}
+                    style={{
+                      position: 'absolute',
+                      right: 0,
+                      top: 0,
+                      bottom: 0,
+                      width: 60,
+                      pointerEvents: 'none',
+                    }}
+                  />
+                )
+              }
+
+              {/* Indicador de navegação (dots) */}
+              {
+                cabinetMedications.length > 1 && (
+                  <View className='flex-row justify-center gap-2 mt-6 mb-2'>
+                    {cabinetMedications.map((_, index) => (
+                      <TouchableOpacity
+                        key={index}
+                        onPress={() => {
+                          cabinetScrollRef.current?.scrollTo({
+                            x: index * 196,
+                            animated: true,
+                          });
+                        }}
+                      >
+                        <View
+                          style={{
+                            width: currentCabinetIndex === index ? 24 : 8,
+                            height: 8,
+                            borderRadius: 4,
+                            backgroundColor: currentCabinetIndex === index ? '#7B5FFF' : '#D1D5DB',
+                            opacity: currentCabinetIndex === index ? 1 : 0.5,
+                          }}
+                        />
+                      </TouchableOpacity>
+                    ))}
+                  </View>
+                )
+              }
             </View>
           </View>
 
           {/* Bottom spacing */}
-          <View className='h-28' />
+          <View className='h-32' />
         </View>
-      </ScrollView>
+      </ScrollView >
 
       {/* Bottom Navigation */}
-      <View
+      < View
         className='absolute bottom-0 left-0 right-0 rounded-t-[32px]'
         style={{
           backgroundColor: '#FFFFFF',
+          borderTopLeftRadius: 32,
+          borderTopRightRadius: 32,
           shadowColor: '#000',
           shadowOffset: { width: 0, height: -4 },
           shadowOpacity: 0.08,
           shadowRadius: 12,
           elevation: 12,
-        }}
+        }
+        }
       >
         <View className='flex-row items-center justify-around px-8' style={{ height: 80 }}>
-          <TouchableOpacity className='items-center justify-center w-14 h-14'>
+          <TouchableOpacity
+            className='items-center justify-center w-14 h-14'
+            onPress={() => navigation.navigate('Home')}
+          >
             <MaterialIcons name='home' size={32} color='#7B5FFF' />
           </TouchableOpacity>
 
@@ -241,6 +487,7 @@ export function HomeScreen() {
               width: 64,
               height: 64,
               backgroundColor: '#7B5FFF',
+              borderRadius: 32,
               shadowColor: '#7B5FFF',
               shadowOffset: { width: 0, height: 8 },
               shadowOpacity: 0.3,
@@ -259,7 +506,132 @@ export function HomeScreen() {
             <MaterialIcons name='calendar-today' size={28} color='#9CA3AF' />
           </TouchableOpacity>
         </View>
-      </View>
-    </View>
+      </View >
+
+      {/* Menu Modal */}
+      < Modal
+        visible={menuVisible}
+        transparent
+        animationType='slide'
+        onRequestClose={() => setMenuVisible(false)}
+      >
+        <TouchableOpacity
+          className='flex-1 bg-black/50'
+          activeOpacity={1}
+          onPress={() => setMenuVisible(false)}
+        >
+          <View
+            className='absolute bottom-0 left-0 right-0 rounded-t-[32px] p-6'
+            style={{
+              backgroundColor: '#FFFFFF',
+              borderTopLeftRadius: 32,
+              borderTopRightRadius: 32,
+              shadowColor: '#000',
+              shadowOffset: { width: 0, height: -4 },
+              shadowOpacity: 0.1,
+              shadowRadius: 12,
+              elevation: 12,
+            }}
+          >
+            <Text className='text-xl font-bold mb-6' style={{ color: '#1A1A1A' }}>
+              Menu
+            </Text>
+
+            <TouchableOpacity
+              className='flex-row items-center gap-4 py-4'
+              onPress={() => {
+                setMenuVisible(false);
+                navigation.navigate('MedicationList');
+              }}
+            >
+              <MaterialIcons name='medication' size={24} color='#7B5FFF' />
+              <Text className='text-base' style={{ color: '#1A1A1A' }}>
+                Meus Medicamentos
+              </Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              className='flex-row items-center gap-4 py-4'
+              onPress={() => {
+                setMenuVisible(false);
+                navigation.navigate('Calendar');
+              }}
+            >
+              <MaterialIcons name='calendar-today' size={24} color='#7B5FFF' />
+              <Text className='text-base' style={{ color: '#1A1A1A' }}>
+                Calendário
+              </Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              className='flex-row items-center gap-4 py-4'
+              onPress={() => {
+                setMenuVisible(false);
+                navigation.navigate('AppointmentList');
+              }}
+            >
+              <MaterialIcons name='event' size={24} color='#7B5FFF' />
+              <Text className='text-base' style={{ color: '#1A1A1A' }}>
+                Minhas Consultas
+              </Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              className='flex-row items-center gap-4 py-4'
+              onPress={() => {
+                setMenuVisible(false);
+                navigation.navigate('Settings');
+              }}
+            >
+              <MaterialIcons name='settings' size={24} color='#7B5FFF' />
+              <Text className='text-base' style={{ color: '#1A1A1A' }}>
+                Configurações
+              </Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              className='flex-row items-center gap-4 py-4'
+              onPress={() => {
+                setMenuVisible(false);
+                navigation.navigate('Profile');
+              }}
+            >
+              <MaterialIcons name='person' size={24} color='#7B5FFF' />
+              <Text className='text-base' style={{ color: '#1A1A1A' }}>
+                Perfil
+              </Text>
+            </TouchableOpacity>
+
+            <View className='border-t my-2' style={{ borderColor: '#E5E7EB' }} />
+
+            <TouchableOpacity
+              className='flex-row items-center gap-4 py-4'
+              onPress={() => {
+                setMenuVisible(false);
+                Alert.alert(
+                  'Sair',
+                  'Tem certeza que deseja sair?',
+                  [
+                    { text: 'Cancelar', style: 'cancel' },
+                    {
+                      text: 'Sair',
+                      style: 'destructive',
+                      onPress: async () => {
+                        await logout();
+                      }
+                    },
+                  ]
+                );
+              }}
+            >
+              <MaterialIcons name='logout' size={24} color='#EF4444' />
+              <Text className='text-base' style={{ color: '#EF4444' }}>
+                Sair
+              </Text>
+            </TouchableOpacity>
+          </View>
+        </TouchableOpacity>
+      </Modal >
+    </View >
   );
 }

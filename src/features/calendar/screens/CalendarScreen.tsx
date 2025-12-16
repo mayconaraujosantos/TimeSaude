@@ -3,7 +3,7 @@ import { MaterialIcons } from '@expo/vector-icons';
 import { useState } from 'react';
 import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
-import { MedicationStackParamList } from '@/app/navigation/MedicationNavigator';
+import { MedicationStackParamList } from '@/navigation_stack/navigation/MedicationNavigator';
 
 type NavigationProp = StackNavigationProp<MedicationStackParamList>;
 
@@ -53,7 +53,7 @@ export function CalendarScreen() {
 
   return (
     <View className='flex-1' style={{ backgroundColor: '#F0EBFF' }}>
-      <ScrollView className='flex-1' showsVerticalScrollIndicator={false}>
+      <ScrollView className='flex-1'>
         {/* Header */}
         <View className='bg-white/60 rounded-b-[40px] px-6 pt-16 pb-6'>
           <View className='flex-row justify-between items-center mb-6'>

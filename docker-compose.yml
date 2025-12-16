@@ -1,0 +1,21 @@
+version: '3.8'
+
+services:
+  nodered:
+    image: nodered/node-red:latest
+    container_name: timesaude-nodered
+    ports:
+      - "0.0.0.0:1880:1880" # Bind explícito em todas interfaces
+    volumes:
+      - nodered-data:/data
+      - ./nodered/flows.json:/data/flows.json:ro
+      - ./nodered/settings.js:/data/settings.js:ro
+      - ./nodered/medications-100.json:/data/medications-100.json:ro
+    environment:
+      - TZ=America/Sao_Paulo
+      - NODE_RED_ENABLE_SAFE_MODE=false
+    restart: unless-stopped
+    network_mode: "host" # Usa a rede do host WSL2 diretamente
+
+volumes:
+  nodered-data:

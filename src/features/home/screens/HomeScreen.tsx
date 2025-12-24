@@ -58,7 +58,7 @@ export function HomeScreen() {
         onPress: async () => {
           try {
             await deleteMedication(med.id);
-          } catch (_error) {
+          } catch {
             Alert.alert('Erro', 'Não foi possível excluir o medicamento');
           }
         },

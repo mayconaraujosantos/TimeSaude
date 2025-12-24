@@ -45,7 +45,7 @@ export function AppointmentListScreen() {
         onPress: async () => {
           try {
             await deleteAppointment(appointment.id);
-          } catch (_error) {
+          } catch {
             Alert.alert('Erro', 'Não foi possível excluir a consulta');
           }
         },

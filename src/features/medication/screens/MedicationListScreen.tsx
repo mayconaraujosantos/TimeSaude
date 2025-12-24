@@ -60,7 +60,7 @@ export function MedicationListScreen() {
             try {
               await deleteMedication(id);
               Alert.alert('Sucesso', 'Medicamento excluído');
-            } catch (_err) {
+            } catch {
               Alert.alert('Erro', 'Não foi possível excluir o medicamento');
             }
           },

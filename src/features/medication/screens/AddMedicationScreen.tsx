@@ -1,5 +1,14 @@
-import { View, Text, ScrollView, TouchableOpacity, Alert, ActivityIndicator } from 'react-native';
+import {
+  View,
+  Text,
+  ScrollView,
+  TouchableOpacity,
+  Alert,
+  ActivityIndicator,
+  Image,
+} from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
+import * as ImagePicker from 'expo-image-picker';
 import { useState } from 'react';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -12,6 +21,7 @@ import { DatePicker } from '@/shared/components/molecules/DatePicker';
 import { MedicationStackParamList } from '@/navigation_stack/navigation/MedicationNavigator';
 import { useMedications } from '../hooks/useMedications';
 import { useAuth } from '@/shared/contexts/AuthContext';
+import { useTheme } from '@/shared/hooks/useTheme';
 import { generateId } from '@/shared/utils';
 import type { Medication, DosageUnit, MedicationForm } from '../model';
 
@@ -21,6 +31,7 @@ export function AddMedicationScreen() {
   const navigation = useNavigation<NavigationProp>();
   const { addMedication } = useMedications();
   const { user } = useAuth();
+  const { colors } = useTheme();
 
   // Form state
   const [name, setName] = useState('');
@@ -32,12 +43,33 @@ export function AddMedicationScreen() {
   const [notes, setNotes] = useState('');
   const [colorCode, setColorCode] = useState('#3B82F6');
   const [icon, setIcon] = useState('pill');
+  const [imageUri, setImageUri] = useState<string | undefined>(undefined);
   const [startDate] = useState(new Date());
   const [endDate, setEndDate] = useState<Date | undefined>(undefined);
   const [loading, setLoading] = useState(false);
 
   // Validation
   const [errors, setErrors] = useState<Record<string, string>>({});
+
+  const pickImage = async () => {
+    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+
+    if (status !== 'granted') {
+      Alert.alert('Permissão negada', 'Precisamos de acesso à galeria para selecionar uma imagem.');
+      return;
+    }
+
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [1, 1],
+      quality: 0.8,
+    });
+
+    if (!result.canceled) {
+      setImageUri(result.assets[0].uri);
+    }
+  };
 
   const validateForm = (): boolean => {
     const newErrors: Record<string, string> = {};
@@ -79,11 +111,12 @@ export function AddMedicationScreen() {
         dosage: dosage.trim(),
         dosageUnit,
         form,
-        purpose: purpose.trim() || undefined,
+        ...(purpose.trim() && { purpose: purpose.trim() }),
         frequency: frequency.trim(),
         startDate,
         endDate,
-        notes: notes.trim() || undefined,
+        ...(notes.trim() && { notes: notes.trim() }),
+        ...(imageUri && { imageUri }),
         colorCode,
         icon,
         isActive: true,
@@ -108,72 +141,103 @@ export function AddMedicationScreen() {
   };
 
   return (
-    <View className='flex-1 bg-gradient-to-br from-pink-200 via-purple-200 to-blue-200'>
-      <ScrollView className='flex-1'>
-        {/* Header */}
-        <View className='bg-white rounded-b-[40px] px-6 pt-14 pb-6'>
-          <View className='flex-row justify-between items-center mb-6'>
-            <TouchableOpacity onPress={() => navigation.goBack()}>
-              <MaterialIcons name='arrow-back' size={24} color='#1A1A1A' />
-            </TouchableOpacity>
-            <Text className='text-2xl font-bold text-primary'>Add Medicine</Text>
-            <TouchableOpacity className='p-2'>
-              <MaterialIcons name='menu' size={24} color='#1A1A1A' />
-            </TouchableOpacity>
-          </View>
+    <View className='flex-1' style={{ backgroundColor: colors.background }}>
+      {/* Header Fixo */}
+      <View
+        className='rounded-b-[40px] px-6 pt-14 pb-6'
+        style={{ backgroundColor: colors.surface }}
+      >
+        <View className='flex-row justify-between items-center mb-6'>
+          <TouchableOpacity onPress={() => navigation.goBack()}>
+            <MaterialIcons name='arrow-back' size={24} color={colors.textPrimary} />
+          </TouchableOpacity>
+          <Text className='text-2xl font-bold' style={{ color: colors.primary }}>
+            Add Medicine
+          </Text>
+          <TouchableOpacity className='p-2'>
+            <MaterialIcons name='menu' size={24} color={colors.textPrimary} />
+          </TouchableOpacity>
+        </View>
 
-          {/* Pill Icon */}
-          <View className='items-center mt-4 mb-6'>
-            <View className='relative'>
-              {/* Decorative circles */}
-              <View className='absolute -top-2 -right-2 w-12 h-12 rounded-full bg-yellow-200 opacity-50' />
-              <View className='absolute -bottom-2 -left-3 w-16 h-16 rounded-full bg-pink-200 opacity-50' />
+        {/* Pill Icon */}
+        <View className='items-center mt-4 mb-6'>
+          <View className='relative'>
+            {/* Decorative circles */}
+            <View
+              className='absolute -top-2 -right-2 w-12 h-12 rounded-full opacity-30'
+              style={{ backgroundColor: colors.accent }}
+            />
+            <View
+              className='absolute -bottom-2 -left-3 w-16 h-16 rounded-full opacity-30'
+              style={{ backgroundColor: colors.secondary }}
+            />
 
-              {/* Main pill icon */}
-              <View className='w-24 h-24 bg-gradient-to-br from-purple-400 to-purple-600 rounded-3xl items-center justify-center rotate-12 shadow-lg'>
-                <Text className='text-4xl'>💊</Text>
-              </View>
+            {/* Main pill icon */}
+            <View
+              className='w-24 h-24 rounded-3xl items-center justify-center rotate-12'
+              style={{
+                backgroundColor: colors.primary,
+                shadowColor: colors.shadow,
+                shadowOffset: { width: 0, height: 4 },
+                shadowOpacity: 0.3,
+                shadowRadius: 8,
+                elevation: 8,
+              }}
+            >
+              <Text className='text-4xl'>💊</Text>
             </View>
           </View>
         </View>
+      </View>
 
-        {/* Form */}
+      {/* Form Scrollable */}
+      <ScrollView className='flex-1'>
         <View className='px-6 pt-6 gap-5'>
           {/* Medication Name */}
           <View>
-            <Text className='text-sm font-medium text-text-primary mb-2'>
-              Nome do Medicamento <Text className='text-red-500'>*</Text>
+            <Text className='text-sm font-medium mb-2' style={{ color: colors.textPrimary }}>
+              Nome do Medicamento <Text style={{ color: colors.error }}>*</Text>
             </Text>
             <Input
               value={name}
-              onChangeText={(text) => {
+              onChangeText={text => {
                 setName(text);
                 if (errors.name) setErrors({ ...errors, name: '' });
               }}
               placeholder='Ex: Paracetamol'
+              borderRadius={20}
               className='bg-white'
             />
-            {errors.name && <Text className='text-red-500 text-xs mt-1'>{errors.name}</Text>}
+            {errors.name && (
+              <Text className='text-xs mt-1' style={{ color: colors.error }}>
+                {errors.name}
+              </Text>
+            )}
           </View>
 
           {/* Dosage, Unit and Form Row */}
           <View className='flex-row gap-3'>
             {/* Dosage */}
             <View className='flex-1'>
-              <Text className='text-sm font-medium text-text-primary mb-2'>
-                Dosagem <Text className='text-red-500'>*</Text>
+              <Text className='text-sm font-medium mb-2' style={{ color: colors.textPrimary }}>
+                Dosagem <Text style={{ color: colors.error }}>*</Text>
               </Text>
               <Input
                 value={dosage}
-                onChangeText={(text) => {
+                onChangeText={text => {
                   setDosage(text);
                   if (errors.dosage) setErrors({ ...errors, dosage: '' });
                 }}
                 placeholder='Ex: 500'
                 keyboardType='numeric'
+                borderRadius={20}
                 className='bg-white'
               />
-              {errors.dosage && <Text className='text-red-500 text-xs mt-1'>{errors.dosage}</Text>}
+              {errors.dosage && (
+                <Text className='text-xs mt-1' style={{ color: colors.error }}>
+                  {errors.dosage}
+                </Text>
+              )}
             </View>
 
             {/* Dosage Unit */}
@@ -219,66 +283,103 @@ export function AddMedicationScreen() {
 
           {/* Purpose */}
           <View>
-            <Text className='text-sm font-medium text-text-primary mb-2'>
+            <Text className='text-sm font-medium mb-2' style={{ color: colors.textPrimary }}>
               Para que serve?
             </Text>
             <Input
               value={purpose}
               onChangeText={setPurpose}
               placeholder='Ex: Controle de pressão arterial'
+              borderRadius={20}
               className='bg-white'
             />
           </View>
 
           {/* Frequency */}
           <View>
-            <Text className='text-sm font-medium text-text-primary mb-2'>
-              Frequência <Text className='text-red-500'>*</Text>
+            <Text className='text-sm font-medium mb-2' style={{ color: colors.textPrimary }}>
+              Frequência <Text style={{ color: colors.error }}>*</Text>
             </Text>
             <Input
               value={frequency}
-              onChangeText={(text) => {
+              onChangeText={text => {
                 setFrequency(text);
                 if (errors.frequency) setErrors({ ...errors, frequency: '' });
               }}
               placeholder='Ex: 8/8h ou 2x ao dia'
+              borderRadius={20}
               className='bg-white'
             />
             {errors.frequency && (
-              <Text className='text-red-500 text-xs mt-1'>{errors.frequency}</Text>
+              <Text className='text-xs mt-1' style={{ color: colors.error }}>
+                {errors.frequency}
+              </Text>
             )}
           </View>
 
           {/* Color and Icon Row */}
           <View className='flex-row gap-3'>
             <View className='flex-1'>
-              <ColorPicker
-                label='Cor do Medicamento'
-                value={colorCode}
-                onSelect={setColorCode}
-              />
+              <ColorPicker label='Cor do Medicamento' value={colorCode} onSelect={setColorCode} />
             </View>
 
             <View className='flex-1'>
-              <IconPicker
-                label='Ícone'
-                value={icon}
-                onSelect={setIcon}
-              />
+              <IconPicker label='Ícone' value={icon} onSelect={setIcon} />
             </View>
+          </View>
+
+          {/* Medication Image */}
+          <View>
+            <Text className='text-sm font-medium mb-2' style={{ color: colors.textPrimary }}>
+              Imagem do Medicamento
+            </Text>
+            <TouchableOpacity
+              onPress={pickImage}
+              className='rounded-2xl border-2 border-dashed p-6 items-center justify-center'
+              style={{
+                borderColor: colors.border,
+                backgroundColor: `${colors.primary}05`,
+              }}
+            >
+              {imageUri ? (
+                <View className='items-center'>
+                  <Image
+                    source={{ uri: imageUri }}
+                    style={{ width: 120, height: 120, borderRadius: 12 }}
+                    resizeMode='cover'
+                  />
+                  <Text className='text-xs mt-2' style={{ color: colors.textSecondary }}>
+                    Toque para alterar
+                  </Text>
+                </View>
+              ) : (
+                <View className='items-center'>
+                  <MaterialIcons name='add-photo-alternate' size={48} color={colors.primary} />
+                  <Text className='text-sm mt-2' style={{ color: colors.textPrimary }}>
+                    Adicionar Foto
+                  </Text>
+                  <Text className='text-xs mt-1' style={{ color: colors.textSecondary }}>
+                    Opcional
+                  </Text>
+                </View>
+              )}
+            </TouchableOpacity>
           </View>
 
           {/* Start and End Date */}
           <View className='flex-row gap-3'>
             {/* Start Date Info */}
             <View className='flex-1'>
-              <Text className='text-sm font-medium text-text-primary mb-2'>
+              <Text className='text-sm font-medium mb-2' style={{ color: colors.textPrimary }}>
                 Data de Início
               </Text>
-              <View className='bg-blue-50 rounded-xl p-4 border border-blue-200'>
+              <View
+                className='rounded-xl p-4 border'
+                style={{ backgroundColor: `${colors.info}15`, borderColor: `${colors.info}40` }}
+              >
                 <View className='flex-row items-center gap-2'>
-                  <MaterialIcons name='calendar-today' size={20} color='#3B82F6' />
-                  <Text className='text-sm text-text-primary'>
+                  <MaterialIcons name='calendar-today' size={20} color={colors.info} />
+                  <Text className='text-sm' style={{ color: colors.textPrimary }}>
                     {startDate.toLocaleDateString('pt-BR', {
                       day: '2-digit',
                       month: 'short',
@@ -302,16 +403,19 @@ export function AddMedicationScreen() {
 
           {/* Notes */}
           <View>
-            <Text className='text-sm font-medium text-text-primary mb-2'>Observações</Text>
+            <Text className='text-sm font-medium mb-2' style={{ color: colors.textPrimary }}>
+              Observações
+            </Text>
             <Input
               value={notes}
               onChangeText={setNotes}
               placeholder='Ex: Tomar após as refeições'
+              borderRadius={20}
               className='bg-white'
               multiline={true}
               numberOfLines={3}
             />
-            <Text className='text-xs text-text-secondary mt-1'>
+            <Text className='text-xs mt-1' style={{ color: colors.textSecondary }}>
               Adicione instruções especiais ou lembretes
             </Text>
           </View>
@@ -326,15 +430,15 @@ export function AddMedicationScreen() {
             />
             {loading && (
               <View className='mt-4 items-center'>
-                <ActivityIndicator size='small' color='#7B5FFF' />
+                <ActivityIndicator size='small' color={colors.primary} />
               </View>
             )}
           </View>
 
           {/* Required Fields Info */}
           <View className='mb-8 px-4'>
-            <Text className='text-xs text-text-secondary text-center'>
-              <Text className='text-red-500'>*</Text> Campos obrigatórios
+            <Text className='text-xs text-center' style={{ color: colors.textSecondary }}>
+              <Text style={{ color: colors.error }}>*</Text> Campos obrigatórios
             </Text>
           </View>
         </View>

@@ -1,4 +1,11 @@
-// Setup para NativeWind em testes
+// Setup para NativeWind e Reanimated em testes
+
+// Mock do Reanimated (deve vir antes do NativeWind)
+jest.mock('react-native-reanimated', () => {
+  const Reanimated = require('react-native-reanimated/mock');
+  Reanimated.default.call = () => {};
+  return Reanimated;
+});
 
 // Mock do NativeWind
 jest.mock('nativewind', () => ({
@@ -20,7 +27,10 @@ beforeAll(() => {
   console.warn = (...args) => {
     if (
       typeof args[0] === 'string' &&
-      (args[0].includes('Animated:') || args[0].includes('flexWrap'))
+      (args[0].includes('Animated:') ||
+        args[0].includes('flexWrap') ||
+        args[0].includes('shared value') ||
+        args[0].includes('reanimated inline style'))
     ) {
       return;
     }

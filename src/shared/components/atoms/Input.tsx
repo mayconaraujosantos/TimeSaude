@@ -8,6 +8,8 @@ export function Input({
   keyboardType = 'default',
   autoCapitalize = 'none',
   customSize,
+  borderRadius = 16,
+  style,
   ...props
 }: {
   placeholder?: string;
@@ -17,6 +19,7 @@ export function Input({
   keyboardType?: 'default' | 'email-address' | 'numeric' | 'phone-pad';
   autoCapitalize?: 'none' | 'sentences' | 'words' | 'characters';
   customSize?: { padding: string; textSize: string };
+  borderRadius?: number;
 } & React.ComponentProps<typeof TextInput>) {
   // Configurações de tamanho padrão
   const sizeConfig = {
@@ -36,7 +39,8 @@ export function Input({
       secureTextEntry={secureTextEntry}
       keyboardType={keyboardType}
       autoCapitalize={autoCapitalize}
-      className={`border border-gray-300 rounded-lg bg-white ${padding} ${textSize}`}
+      className={`border border-gray-300 bg-white ${padding} ${textSize}`}
+      style={[{ borderRadius }, style]}
       {...props}
     />
   );

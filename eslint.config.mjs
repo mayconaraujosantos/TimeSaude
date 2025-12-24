@@ -91,7 +91,8 @@ export default tseslint.config(
         ecmaFeatures: {
           jsx: true,
         },
-        project: './tsconfig.json',
+        projectService: true,
+        // project: './tsconfig.json',
       },
       globals: {
         ...globals.browser,

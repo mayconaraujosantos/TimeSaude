@@ -2,10 +2,10 @@ import { View, Text, ScrollView, TouchableOpacity } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useState } from 'react';
 import { useNavigation } from '@react-navigation/native';
-import { StackNavigationProp } from '@react-navigation/stack';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { MedicationStackParamList } from '@/navigation_stack/navigation/MedicationNavigator';
 
-type NavigationProp = StackNavigationProp<MedicationStackParamList>;
+type NavigationProp = NativeStackNavigationProp<MedicationStackParamList>;
 
 export function CalendarScreen() {
   const navigation = useNavigation<NavigationProp>();

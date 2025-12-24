@@ -4,8 +4,8 @@ import { MockAppointmentRepository } from './MockAppointmentRepository';
 let repositoryInstance: AppointmentRepository | null = null;
 
 export function getAppointmentRepository(): AppointmentRepository {
-    if (!repositoryInstance) {
-        repositoryInstance = new MockAppointmentRepository();
-    }
-    return repositoryInstance;
+  if (!repositoryInstance) {
+    repositoryInstance = new MockAppointmentRepository();
+  }
+  return repositoryInstance;
 }

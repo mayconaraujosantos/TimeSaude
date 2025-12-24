@@ -1,0 +1,357 @@
+import { View, Text, ScrollView, TouchableOpacity, Switch, Alert } from 'react-native';
+import { MaterialIcons } from '@expo/vector-icons';
+import { useNavigation } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { MedicationStackParamList } from '@/navigation_stack/navigation/MedicationNavigator';
+import { useState } from 'react';
+import { useTheme } from '@/shared/hooks/useTheme';
+
+type NavigationProp = NativeStackNavigationProp<MedicationStackParamList>;
+
+export function SettingsScreen() {
+  const navigation = useNavigation<NavigationProp>();
+  const { colors, actualTheme } = useTheme();
+  const [notifications, setNotifications] = useState(true);
+  const [soundEnabled, setSoundEnabled] = useState(true);
+  const [vibrationEnabled, setVibrationEnabled] = useState(true);
+  const [dailyReminder, setDailyReminder] = useState(true);
+
+  const handleBackup = () => {
+    Alert.alert(
+      'Backup',
+      'Seu backup foi realizado com sucesso! Todos os dados foram salvos na nuvem.',
+      [{ text: 'OK' }]
+    );
+  };
+
+  const handlePrivacy = () => {
+    Alert.alert(
+      'Privacidade',
+      'Política de Privacidade\n\nSeus dados são criptografados e armazenados com segurança. Não compartilhamos suas informações com terceiros.',
+      [{ text: 'OK' }]
+    );
+  };
+
+  const handleClearData = () => {
+    Alert.alert(
+      'Limpar Dados',
+      'Tem certeza que deseja limpar todos os dados? Esta ação não pode ser desfeita.',
+      [
+        { text: 'Cancelar', style: 'cancel' },
+        {
+          text: 'Limpar',
+          style: 'destructive',
+          onPress: () => {
+            Alert.alert('Sucesso', 'Todos os dados foram removidos.');
+          },
+        },
+      ]
+    );
+  };
+
+  const handleAbout = () => {
+    Alert.alert(
+      'Sobre o TimeSaúde',
+      'TimeSaúde v1.0.0\n\nAplicativo para gerenciamento de medicamentos e consultas médicas.\n\nDesenvolvido com \u2764\ufe0f para ajudar você a cuidar da sua saúde.',
+      [{ text: 'OK' }]
+    );
+  };
+
+  const handleTerms = () => {
+    Alert.alert(
+      'Termos de Uso',
+      'Termos de Uso do TimeSaúde\n\n1. Aceitação dos Termos\n2. Uso do Serviço\n3. Privacidade e Dados\n4. Limitações de Responsabilidade\n\nAo usar este aplicativo, você concorda com nossos termos.',
+      [{ text: 'OK' }]
+    );
+  };
+
+  const handleHelp = () => {
+    Alert.alert(
+      'Ajuda',
+      'Central de Ajuda\n\n\u2022 Como adicionar medicamentos?\n\u2022 Como agendar consultas?\n\u2022 Como configurar lembretes?\n\nPara mais ajuda, entre em contato:\nsuporte@timesaude.com',
+      [{ text: 'OK' }]
+    );
+  };
+
+  return (
+    <View className='flex-1' style={{ backgroundColor: '#F8F9FA' }}>
+      {/* Header */}
+      <View
+        className='px-6 pt-16 pb-6'
+        style={{
+          backgroundColor: '#FFFFFF',
+          shadowColor: '#000',
+          shadowOffset: { width: 0, height: 2 },
+          shadowOpacity: 0.08,
+          shadowRadius: 8,
+          elevation: 4,
+        }}
+      >
+        <View className='flex-row items-center justify-between'>
+          <TouchableOpacity
+            className='w-10 h-10 items-center justify-center rounded-full'
+            style={{ backgroundColor: '#F3F4F6' }}
+            onPress={() => navigation.goBack()}
+          >
+            <MaterialIcons name='arrow-back' size={24} color='#1A1A1A' />
+          </TouchableOpacity>
+          <Text className='text-2xl font-bold' style={{ color: '#1A1A1A' }}>
+            Configurações
+          </Text>
+          <View className='w-10' />
+        </View>
+      </View>
+
+      <ScrollView className='flex-1 px-6 pt-6'>
+        {/* Notifications Section */}
+        <View className='mb-6'>
+          <Text className='text-lg font-bold mb-3' style={{ color: '#1A1A1A' }}>
+            Notificações
+          </Text>
+
+          <View className='rounded-3xl p-4' style={{ backgroundColor: '#FFFFFF' }}>
+            <View
+              className='flex-row justify-between items-center py-3 border-b'
+              style={{ borderColor: '#E5E7EB' }}
+            >
+              <View className='flex-row items-center gap-3 flex-1'>
+                <MaterialIcons name='notifications' size={24} color='#7B5FFF' />
+                <View className='flex-1'>
+                  <Text className='text-base font-medium' style={{ color: '#1A1A1A' }}>
+                    Notificações Push
+                  </Text>
+                  <Text className='text-xs' style={{ color: '#6B7280' }}>
+                    Receba alertas de medicamentos
+                  </Text>
+                </View>
+              </View>
+              <Switch
+                value={notifications}
+                onValueChange={setNotifications}
+                trackColor={{ false: '#E5E7EB', true: '#C4B5FD' }}
+                thumbColor={notifications ? '#7B5FFF' : '#9CA3AF'}
+              />
+            </View>
+
+            <View
+              className='flex-row justify-between items-center py-3 border-b'
+              style={{ borderColor: '#E5E7EB' }}
+            >
+              <View className='flex-row items-center gap-3 flex-1'>
+                <MaterialIcons name='volume-up' size={24} color='#7B5FFF' />
+                <View className='flex-1'>
+                  <Text className='text-base font-medium' style={{ color: '#1A1A1A' }}>
+                    Som
+                  </Text>
+                  <Text className='text-xs' style={{ color: '#6B7280' }}>
+                    Alertas sonoros
+                  </Text>
+                </View>
+              </View>
+              <Switch
+                value={soundEnabled}
+                onValueChange={setSoundEnabled}
+                trackColor={{ false: '#E5E7EB', true: '#C4B5FD' }}
+                thumbColor={soundEnabled ? '#7B5FFF' : '#9CA3AF'}
+              />
+            </View>
+
+            <View
+              className='flex-row justify-between items-center py-3 border-b'
+              style={{ borderColor: '#E5E7EB' }}
+            >
+              <View className='flex-row items-center gap-3 flex-1'>
+                <MaterialIcons name='vibration' size={24} color='#7B5FFF' />
+                <View className='flex-1'>
+                  <Text className='text-base font-medium' style={{ color: '#1A1A1A' }}>
+                    Vibração
+                  </Text>
+                  <Text className='text-xs' style={{ color: '#6B7280' }}>
+                    Vibrar em alertas
+                  </Text>
+                </View>
+              </View>
+              <Switch
+                value={vibrationEnabled}
+                onValueChange={setVibrationEnabled}
+                trackColor={{ false: '#E5E7EB', true: '#C4B5FD' }}
+                thumbColor={vibrationEnabled ? '#7B5FFF' : '#9CA3AF'}
+              />
+            </View>
+
+            <View className='flex-row justify-between items-center py-3'>
+              <View className='flex-row items-center gap-3 flex-1'>
+                <MaterialIcons name='alarm' size={24} color='#7B5FFF' />
+                <View className='flex-1'>
+                  <Text className='text-base font-medium' style={{ color: '#1A1A1A' }}>
+                    Lembrete Diário
+                  </Text>
+                  <Text className='text-xs' style={{ color: '#6B7280' }}>
+                    Resumo diário às 9h
+                  </Text>
+                </View>
+              </View>
+              <Switch
+                value={dailyReminder}
+                onValueChange={setDailyReminder}
+                trackColor={{ false: '#E5E7EB', true: '#C4B5FD' }}
+                thumbColor={dailyReminder ? '#7B5FFF' : '#9CA3AF'}
+              />
+            </View>
+          </View>
+        </View>
+
+        {/* Appearance Section */}
+        <View className='mb-6'>
+          <Text className='text-lg font-bold mb-3' style={{ color: '#1A1A1A' }}>
+            Aparência
+          </Text>
+
+          <View className='rounded-3xl' style={{ backgroundColor: '#FFFFFF' }}>
+            <TouchableOpacity
+              className='flex-row justify-between items-center p-4 border-b'
+              style={{ borderColor: '#E5E7EB' }}
+            >
+              <View className='flex-row items-center gap-3'>
+                <MaterialIcons name='brightness-6' size={24} color='#7B5FFF' />
+                <Text className='text-base font-medium' style={{ color: '#1A1A1A' }}>
+                  Tema
+                </Text>
+              </View>
+              <View className='flex-row items-center gap-2'>
+                <Text className='text-sm' style={{ color: '#6B7280' }}>
+                  Claro
+                </Text>
+                <MaterialIcons name='chevron-right' size={20} color='#9CA3AF' />
+              </View>
+            </TouchableOpacity>
+
+            <TouchableOpacity className='flex-row justify-between items-center p-4'>
+              <View className='flex-row items-center gap-3'>
+                <MaterialIcons name='language' size={24} color='#7B5FFF' />
+                <Text className='text-base font-medium' style={{ color: '#1A1A1A' }}>
+                  Idioma
+                </Text>
+              </View>
+              <View className='flex-row items-center gap-2'>
+                <Text className='text-sm' style={{ color: '#6B7280' }}>
+                  Português
+                </Text>
+                <MaterialIcons name='chevron-right' size={20} color='#9CA3AF' />
+              </View>
+            </TouchableOpacity>
+          </View>
+        </View>
+
+        {/* Data & Privacy Section */}
+        <View className='mb-6'>
+          <Text className='text-lg font-bold mb-3' style={{ color: '#1A1A1A' }}>
+            Dados e Privacidade
+          </Text>
+
+          <View className='rounded-3xl' style={{ backgroundColor: '#FFFFFF' }}>
+            <TouchableOpacity
+              className='flex-row justify-between items-center p-4 border-b'
+              style={{ borderColor: '#E5E7EB' }}
+              onPress={handleBackup}
+            >
+              <View className='flex-row items-center gap-3'>
+                <MaterialIcons name='backup' size={24} color='#7B5FFF' />
+                <Text className='text-base font-medium' style={{ color: '#1A1A1A' }}>
+                  Backup
+                </Text>
+              </View>
+              <MaterialIcons name='chevron-right' size={20} color='#9CA3AF' />
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              className='flex-row justify-between items-center p-4 border-b'
+              style={{ borderColor: '#E5E7EB' }}
+              onPress={handlePrivacy}
+            >
+              <View className='flex-row items-center gap-3'>
+                <MaterialIcons name='security' size={24} color='#7B5FFF' />
+                <Text className='text-base font-medium' style={{ color: '#1A1A1A' }}>
+                  Privacidade
+                </Text>
+              </View>
+              <MaterialIcons name='chevron-right' size={20} color='#9CA3AF' />
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              className='flex-row justify-between items-center p-4'
+              onPress={handleClearData}
+            >
+              <View className='flex-row items-center gap-3'>
+                <MaterialIcons name='delete-outline' size={24} color='#EF4444' />
+                <Text className='text-base font-medium' style={{ color: '#EF4444' }}>
+                  Limpar Dados
+                </Text>
+              </View>
+              <MaterialIcons name='chevron-right' size={20} color='#9CA3AF' />
+            </TouchableOpacity>
+          </View>
+        </View>
+
+        {/* About Section */}
+        <View className='mb-6'>
+          <Text className='text-lg font-bold mb-3' style={{ color: '#1A1A1A' }}>
+            Sobre
+          </Text>
+
+          <View className='rounded-3xl' style={{ backgroundColor: '#FFFFFF' }}>
+            <TouchableOpacity
+              className='flex-row justify-between items-center p-4 border-b'
+              style={{ borderColor: '#E5E7EB' }}
+              onPress={handleAbout}
+            >
+              <View className='flex-row items-center gap-3'>
+                <MaterialIcons name='info-outline' size={24} color='#7B5FFF' />
+                <Text className='text-base font-medium' style={{ color: '#1A1A1A' }}>
+                  Sobre o App
+                </Text>
+              </View>
+              <MaterialIcons name='chevron-right' size={20} color='#9CA3AF' />
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              className='flex-row justify-between items-center p-4 border-b'
+              style={{ borderColor: '#E5E7EB' }}
+              onPress={handleTerms}
+            >
+              <View className='flex-row items-center gap-3'>
+                <MaterialIcons name='description' size={24} color='#7B5FFF' />
+                <Text className='text-base font-medium' style={{ color: '#1A1A1A' }}>
+                  Termos de Uso
+                </Text>
+              </View>
+              <MaterialIcons name='chevron-right' size={20} color='#9CA3AF' />
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              className='flex-row justify-between items-center p-4'
+              onPress={handleHelp}
+            >
+              <View className='flex-row items-center gap-3'>
+                <MaterialIcons name='help-outline' size={24} color='#7B5FFF' />
+                <Text className='text-base font-medium' style={{ color: '#1A1A1A' }}>
+                  Ajuda
+                </Text>
+              </View>
+              <MaterialIcons name='chevron-right' size={20} color='#9CA3AF' />
+            </TouchableOpacity>
+          </View>
+        </View>
+
+        <View className='items-center py-6 mb-8'>
+          <Text className='text-xs' style={{ color: '#9CA3AF' }}>
+            TimeSaúde v1.0.0
+          </Text>
+          <Text className='text-xs mt-1' style={{ color: '#9CA3AF' }}>
+            © 2025 Todos os direitos reservados
+          </Text>
+        </View>
+      </ScrollView>
+    </View>
+  );
+}

@@ -22,14 +22,14 @@ import type { Medication } from '../model';
 
 type NavigationProp = NativeStackNavigationProp<MedicationStackParamList, 'MedicationList'>;
 
-
 export function MedicationListScreen() {
   console.log('[MEDICATION_LIST] Component rendering - START');
 
   const navigation = useNavigation<NavigationProp>();
   console.log('[MEDICATION_LIST] useNavigation SUCCESS, navigation exists:', !!navigation);
 
-  const { medications, loading, error, isOfflineMode, deleteMedication, refresh } = useMedications();
+  const { medications, loading, error, isOfflineMode, deleteMedication, refresh } =
+    useMedications();
   console.log('[MEDICATION_LIST] Medications count:', medications.length);
   console.log('[MEDICATION_LIST] Offline mode:', isOfflineMode);
 
@@ -49,23 +49,26 @@ export function MedicationListScreen() {
     setEditModalVisible(true);
   }, []);
 
-  const handleDelete = useCallback(async (id: string, name: string) => {
-    Alert.alert('Excluir Medicamento', `Deseja realmente excluir "${name}"?`, [
-      { text: 'Cancelar', style: 'cancel' },
-      {
-        text: 'Excluir',
-        style: 'destructive',
-        onPress: async () => {
-          try {
-            await deleteMedication(id);
-            Alert.alert('Sucesso', 'Medicamento excluído');
-          } catch (err) {
-            Alert.alert('Erro', 'Não foi possível excluir o medicamento');
-          }
+  const handleDelete = useCallback(
+    async (id: string, name: string) => {
+      Alert.alert('Excluir Medicamento', `Deseja realmente excluir "${name}"?`, [
+        { text: 'Cancelar', style: 'cancel' },
+        {
+          text: 'Excluir',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              await deleteMedication(id);
+              Alert.alert('Sucesso', 'Medicamento excluído');
+            } catch (err) {
+              Alert.alert('Erro', 'Não foi possível excluir o medicamento');
+            }
+          },
         },
-      },
-    ]);
-  }, [deleteMedication]);
+      ]);
+    },
+    [deleteMedication]
+  );
 
   const handleRefresh = useCallback(async () => {
     setRefreshing(true);
@@ -81,7 +84,7 @@ export function MedicationListScreen() {
 
     const query = searchQuery.toLowerCase();
     return medications.filter(
-      (med) =>
+      med =>
         med.name.toLowerCase().includes(query) ||
         med.dosage.toLowerCase().includes(query) ||
         (med.notes && med.notes.toLowerCase().includes(query))
@@ -90,13 +93,7 @@ export function MedicationListScreen() {
 
   // Render item otimizado com useCallback
   const renderItem: ListRenderItem<Medication> = useCallback(
-    ({ item }) => (
-      <MedicationCard
-        medication={item}
-        onEdit={handleEdit}
-        onDelete={handleDelete}
-      />
-    ),
+    ({ item }) => <MedicationCard medication={item} onEdit={handleEdit} onDelete={handleDelete} />,
     [handleEdit, handleDelete]
   );
 
@@ -170,10 +167,7 @@ export function MedicationListScreen() {
         <MaterialIcons name='error-outline' size={64} color='#EF4444' />
         <Text className='mt-4 text-lg font-bold text-gray-900'>Erro ao carregar</Text>
         <Text className='mt-2 text-gray-600 text-center'>{error.message}</Text>
-        <TouchableOpacity
-          onPress={refresh}
-          className='mt-6 bg-primary px-6 py-3 rounded-full'
-        >
+        <TouchableOpacity onPress={refresh} className='mt-6 bg-primary px-6 py-3 rounded-full'>
           <Text className='text-white font-semibold'>Tentar Novamente</Text>
         </TouchableOpacity>
       </View>
@@ -186,9 +180,7 @@ export function MedicationListScreen() {
       {isOfflineMode && (
         <View className='bg-amber-500 px-4 py-2 flex-row items-center justify-center'>
           <MaterialIcons name='cloud-off' size={20} color='white' />
-          <Text className='text-white font-semibold ml-2'>
-            Modo Offline - Dados de Exemplo
-          </Text>
+          <Text className='text-white font-semibold ml-2'>Modo Offline - Dados de Exemplo</Text>
         </View>
       )}
 
@@ -211,9 +203,7 @@ export function MedicationListScreen() {
       {/* Fixed Section Header */}
       <View className='bg-gray-50 px-6 pt-6 pb-3'>
         <View className='flex-row justify-between items-center mb-4'>
-          <Text className='text-lg font-bold text-gray-900'>
-            Meus Medicamentos
-          </Text>
+          <Text className='text-lg font-bold text-gray-900'>Meus Medicamentos</Text>
           <TouchableOpacity
             onPress={() => navigation.navigate('AddMedication')}
             className='bg-primary px-4 py-2 rounded-full'

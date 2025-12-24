@@ -1,22 +1,26 @@
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { MedicationListScreen } from '@/features/medication/screens/MedicationListScreen';
 import { AddMedicationScreen } from '@/features/medication/screens/AddMedicationScreen';
+import { MedicationDetailsScreen } from '@/features/medication/screens/MedicationDetailsScreen';
 import { HomeScreen } from '@/features/home/screens/HomeScreen';
 import { CalendarScreen } from '@/features/calendar/screens/CalendarScreen';
 import { SettingsScreen } from '@/features/settings/screens/SettingsScreen';
 import { ProfileScreen } from '@/features/profile/screens/ProfileScreen';
 import { AppointmentListScreen } from '@/features/appointment/screens/AppointmentListScreen';
 import { AddAppointmentScreen } from '@/features/appointment/screens/AddAppointmentScreen';
+import { ThemeSettingsScreen } from '@/features/settings/screens/ThemeSettingsScreen';
 
 export type MedicationStackParamList = {
   Home: undefined;
   Calendar: undefined;
   MedicationList: undefined;
   AddMedication: undefined;
+  MedicationDetails: { medicationId: string };
   Settings: undefined;
   Profile: undefined;
   AppointmentList: undefined;
   AddAppointment: undefined;
+  ThemeSettings: undefined;
 };
 
 const Stack = createNativeStackNavigator<MedicationStackParamList>();
@@ -34,7 +38,9 @@ export function MedicationNavigator() {
       <Stack.Screen name='Calendar' component={CalendarScreen} />
       <Stack.Screen name='MedicationList' component={MedicationListScreen} />
       <Stack.Screen name='AddMedication' component={AddMedicationScreen} />
+      <Stack.Screen name='MedicationDetails' component={MedicationDetailsScreen} />
       <Stack.Screen name='Settings' component={SettingsScreen} />
+      <Stack.Screen name='ThemeSettings' component={ThemeSettingsScreen} />
       <Stack.Screen name='Profile' component={ProfileScreen} />
       <Stack.Screen name='AppointmentList' component={AppointmentListScreen} />
       <Stack.Screen name='AddAppointment' component={AddAppointmentScreen} />

@@ -21,12 +21,14 @@ pnpm install
 pnpm run android
 ```
 
-**Importante**: Se ver erro `Network request failed`, execute `pnpm adb:reverse` para configurar o port forwarding.
+**Importante**: Se ver erro `Network request failed`, execute `pnpm adb:reverse`
+para configurar o port forwarding.
 
 **Documentação completa**:
 
 - [`doc/QUICK_START_NODERED.md`](doc/QUICK_START_NODERED.md)
-- [`doc/CONNECTIVITY_GUIDE.md`](doc/CONNECTIVITY_GUIDE.md) - Resolver problemas de rede
+- [`doc/CONNECTIVITY_GUIDE.md`](doc/CONNECTIVITY_GUIDE.md) - Resolver problemas
+  de rede
 
 ## 📱 Funcionalidades
 
@@ -92,7 +94,8 @@ API REST implementada em Node-RED para desenvolvimento rápido.
 
 ### Javalin (Futuro)
 
-API em desenvolvimento com Kotlin/Javalin. Quando estiver pronta, basta alterar a `baseUrl` em `.env`.
+API em desenvolvimento com Kotlin/Javalin. Quando estiver pronta, basta alterar
+a `baseUrl` em `.env`.
 
 ## 🧪 Testes
 

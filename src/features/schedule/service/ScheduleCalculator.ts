@@ -21,7 +21,7 @@ export class ScheduleCalculator {
     }
 
     // Começar da data de início ou agora (o que for mais recente)
-    let currentDate = new Date(Math.max(schedule.startDate.getTime(), now.getTime()));
+    const currentDate = new Date(Math.max(schedule.startDate.getTime(), now.getTime()));
 
     while (doses.length < count) {
       // Verificar se ainda está dentro do período

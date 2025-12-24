@@ -66,7 +66,7 @@ export function AddMedicationScreen() {
       quality: 0.8,
     });
 
-    if (!result.canceled) {
+    if (!result.canceled && result.assets && result.assets[0]) {
       setImageUri(result.assets[0].uri);
     }
   };

@@ -80,7 +80,7 @@ export function DatePicker({
           value={tempDate}
           mode='date'
           display='default'
-          minimumDate={minimumDate}
+          {...(minimumDate && { minimumDate })}
           onChange={(event, selectedDate) => {
             setIsOpen(false);
             if (event.type === 'set' && selectedDate) {

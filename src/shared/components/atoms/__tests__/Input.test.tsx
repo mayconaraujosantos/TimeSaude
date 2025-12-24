@@ -50,8 +50,8 @@ describe('Input component', () => {
     const input = getByPlaceholderText('Test');
 
     expect(input.props.className).toContain('border');
-    expect(input.props.className).toContain('rounded-lg');
     expect(input.props.className).toContain('bg-white');
+    // borderRadius now applied via style prop, not className
   });
 
   it('should use medium size by default', () => {

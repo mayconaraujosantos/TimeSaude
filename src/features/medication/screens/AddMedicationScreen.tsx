@@ -114,7 +114,7 @@ export function AddMedicationScreen() {
         ...(purpose.trim() && { purpose: purpose.trim() }),
         frequency: frequency.trim(),
         startDate,
-        endDate,
+        ...(endDate && { endDate }),
         ...(notes.trim() && { notes: notes.trim() }),
         ...(imageUri && { imageUri }),
         colorCode,

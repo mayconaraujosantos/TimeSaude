@@ -18,6 +18,7 @@ import { ColorPicker } from '@/shared/components/molecules/ColorPicker';
 import { IconPicker } from '@/shared/components/molecules/IconPicker';
 import { DatePicker } from '@/shared/components/molecules/DatePicker';
 import { useMedications } from '../hooks/useMedications';
+import { useTheme } from '@/shared/hooks/useTheme';
 import type { DosageUnit, MedicationForm } from '../model';
 
 interface EditMedicationModalProps {
@@ -28,6 +29,7 @@ interface EditMedicationModalProps {
 
 export function EditMedicationModal({ visible, medicationId, onClose }: EditMedicationModalProps) {
   const { medications, updateMedication } = useMedications();
+  const { colors } = useTheme();
 
   // Busca o medication apenas quando necessário
   const medication = medicationId ? medications.find(med => med.id === medicationId) : null; // Form state
@@ -136,12 +138,20 @@ export function EditMedicationModal({ visible, medicationId, onClose }: EditMedi
 
   return (
     <Modal visible={visible} animationType='slide' transparent={false} onRequestClose={onClose}>
-      <View className='flex-1 bg-white'>
+      <View className='flex-1' style={{ backgroundColor: colors.background }}>
         {/* Header */}
-        <View className='flex-row justify-between items-center px-6 pt-12 pb-4 border-b border-gray-200 bg-white'>
-          <Text className='text-xl font-bold text-gray-900'>Editar Medicamento</Text>
+        <View
+          className='flex-row justify-between items-center px-6 pt-12 pb-4 border-b'
+          style={{
+            borderColor: colors.border,
+            backgroundColor: colors.surface,
+          }}
+        >
+          <Text className='text-xl font-bold' style={{ color: colors.textPrimary }}>
+            Editar Medicamento
+          </Text>
           <TouchableOpacity onPress={onClose} className='p-2'>
-            <MaterialIcons name='close' size={24} color='#6B7280' />
+            <MaterialIcons name='close' size={24} color={colors.textSecondary} />
           </TouchableOpacity>
         </View>
 
@@ -158,8 +168,8 @@ export function EditMedicationModal({ visible, medicationId, onClose }: EditMedi
           >
             {/* Medication Name */}
             <View className='mb-4'>
-              <Text className='text-sm font-medium text-gray-700 mb-2'>
-                Nome do Medicamento <Text className='text-red-500'>*</Text>
+              <Text className='text-sm font-medium mb-2' style={{ color: colors.textPrimary }}>
+                Nome do Medicamento <Text style={{ color: colors.error }}>*</Text>
               </Text>
               <Input
                 value={name}
@@ -169,14 +179,18 @@ export function EditMedicationModal({ visible, medicationId, onClose }: EditMedi
                 }}
                 placeholder='Ex: Paracetamol'
               />
-              {errors.name && <Text className='text-red-500 text-xs mt-1'>{errors.name}</Text>}
+              {errors.name && (
+                <Text className='text-xs mt-1' style={{ color: colors.error }}>
+                  {errors.name}
+                </Text>
+              )}
             </View>
 
             {/* Dosage and Frequency */}
             <View className='flex-row gap-3 mb-4'>
               <View className='flex-1'>
-                <Text className='text-sm font-medium text-gray-700 mb-2'>
-                  Dosagem <Text className='text-red-500'>*</Text>
+                <Text className='text-sm font-medium mb-2' style={{ color: colors.textPrimary }}>
+                  Dosagem <Text style={{ color: colors.error }}>*</Text>
                 </Text>
                 <Input
                   value={dosage}
@@ -188,7 +202,9 @@ export function EditMedicationModal({ visible, medicationId, onClose }: EditMedi
                   keyboardType='numeric'
                 />
                 {errors.dosage && (
-                  <Text className='text-red-500 text-xs mt-1'>{errors.dosage}</Text>
+                  <Text className='text-xs mt-1' style={{ color: colors.error }}>
+                    {errors.dosage}
+                  </Text>
                 )}
               </View>
 
@@ -236,7 +252,9 @@ export function EditMedicationModal({ visible, medicationId, onClose }: EditMedi
 
             {/* Purpose */}
             <View className='mb-4'>
-              <Text className='text-sm font-medium text-gray-700 mb-2'>Para que serve?</Text>
+              <Text className='text-sm font-medium mb-2' style={{ color: colors.textPrimary }}>
+                Para que serve?
+              </Text>
               <Input
                 value={purpose}
                 onChangeText={setPurpose}
@@ -246,8 +264,8 @@ export function EditMedicationModal({ visible, medicationId, onClose }: EditMedi
 
             {/* Frequency */}
             <View className='mb-4'>
-              <Text className='text-sm font-medium text-gray-700 mb-2'>
-                Frequência <Text className='text-red-500'>*</Text>
+              <Text className='text-sm font-medium mb-2' style={{ color: colors.textPrimary }}>
+                Frequência <Text style={{ color: colors.error }}>*</Text>
               </Text>
               <Input
                 value={frequency}
@@ -258,7 +276,9 @@ export function EditMedicationModal({ visible, medicationId, onClose }: EditMedi
                 placeholder='Ex: 8/8h ou 2x ao dia'
               />
               {errors.frequency && (
-                <Text className='text-red-500 text-xs mt-1'>{errors.frequency}</Text>
+                <Text className='text-xs mt-1' style={{ color: colors.error }}>
+                  {errors.frequency}
+                </Text>
               )}
             </View>
 
@@ -285,7 +305,9 @@ export function EditMedicationModal({ visible, medicationId, onClose }: EditMedi
 
             {/* Notes */}
             <View className='mb-4'>
-              <Text className='text-sm font-medium text-gray-700 mb-2'>Observações</Text>
+              <Text className='text-sm font-medium mb-2' style={{ color: colors.textPrimary }}>
+                Observações
+              </Text>
               <Input
                 value={notes}
                 onChangeText={setNotes}
@@ -297,12 +319,17 @@ export function EditMedicationModal({ visible, medicationId, onClose }: EditMedi
 
             {/* Start Date Info */}
             {medication && (
-              <View className='bg-blue-50 rounded-xl p-4 border border-blue-200 mb-6'>
+              <View
+                className='rounded-xl p-4 border mb-6'
+                style={{ backgroundColor: `${colors.info}15`, borderColor: `${colors.info}40` }}
+              >
                 <View className='flex-row items-center gap-2'>
-                  <MaterialIcons name='calendar-today' size={20} color='#3B82F6' />
+                  <MaterialIcons name='calendar-today' size={20} color={colors.info} />
                   <View className='flex-1'>
-                    <Text className='text-sm font-medium text-gray-700'>Data de início</Text>
-                    <Text className='text-xs text-gray-500 mt-1'>
+                    <Text className='text-sm font-medium' style={{ color: colors.textPrimary }}>
+                      Data de início
+                    </Text>
+                    <Text className='text-xs mt-1' style={{ color: colors.textSecondary }}>
                       {new Date(medication.startDate).toLocaleDateString('pt-BR', {
                         day: '2-digit',
                         month: 'long',
@@ -331,7 +358,7 @@ export function EditMedicationModal({ visible, medicationId, onClose }: EditMedi
 
             {loading && (
               <View className='items-center pb-4'>
-                <ActivityIndicator size='small' color='#7B5FFF' />
+                <ActivityIndicator size='small' color={colors.primary} />
               </View>
             )}
           </ScrollView>

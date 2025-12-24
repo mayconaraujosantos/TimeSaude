@@ -2,6 +2,7 @@ import { View, Text, TouchableOpacity, Modal, Platform } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useState } from 'react';
 import DateTimePicker from '@react-native-community/datetimepicker';
+import { useTheme } from '@/shared/hooks/useTheme';
 
 interface DatePickerProps {
   label: string;
@@ -24,6 +25,7 @@ export function DatePicker({
 }: DatePickerProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [tempDate, setTempDate] = useState<Date>(value || new Date());
+  const { colors } = useTheme();
 
   const formatDate = (date: Date | undefined) => {
     if (!date) return placeholder;
@@ -46,18 +48,24 @@ export function DatePicker({
 
   return (
     <View>
-      <Text className='text-sm font-medium text-text-primary mb-2'>
-        {label} {required && <Text className='text-red-500'>*</Text>}
+      <Text className='text-sm font-medium mb-2' style={{ color: colors.textPrimary }}>
+        {label} {required && <Text style={{ color: colors.error }}>*</Text>}
       </Text>
 
       <TouchableOpacity
         onPress={() => setIsOpen(true)}
-        className='bg-white rounded-xl px-4 py-3 border border-gray-200'
-        style={{ borderColor: error ? '#EF4444' : '#E5E7EB' }}
+        className='rounded-xl px-4 py-3 border'
+        style={{
+          backgroundColor: colors.surface,
+          borderColor: error ? colors.error : colors.border,
+        }}
       >
         <View className='flex-row items-center gap-3'>
-          <MaterialIcons name='calendar-today' size={20} color='#7B5FFF' />
-          <Text className={value ? 'flex-1 text-text-primary' : 'flex-1 text-text-secondary'}>
+          <MaterialIcons name='calendar-today' size={20} color={colors.primary} />
+          <Text
+            className='flex-1'
+            style={{ color: value ? colors.textPrimary : colors.textSecondary }}
+          >
             {formatDate(value)}
           </Text>
           {value && (
@@ -67,13 +75,17 @@ export function DatePicker({
                 onSelect(undefined);
               }}
             >
-              <MaterialIcons name='close' size={20} color='#9CA3AF' />
+              <MaterialIcons name='close' size={20} color={colors.textSecondary} />
             </TouchableOpacity>
           )}
         </View>
       </TouchableOpacity>
 
-      {error && <Text className='text-red-500 text-xs mt-1'>{error}</Text>}
+      {error && (
+        <Text className='text-xs mt-1' style={{ color: colors.error }}>
+          {error}
+        </Text>
+      )}
 
       {Platform.OS === 'android' && isOpen && (
         <DateTimePicker
@@ -98,16 +110,19 @@ export function DatePicker({
           onRequestClose={() => setIsOpen(false)}
         >
           <TouchableOpacity
-            className='flex-1 bg-black/50 justify-end'
+            className='flex-1 justify-end'
+            style={{ backgroundColor: colors.overlay }}
             activeOpacity={1}
             onPress={() => setIsOpen(false)}
           >
-            <View className='bg-white rounded-t-[32px]'>
-              <View className='px-6 py-4 border-b border-gray-200'>
+            <View className='rounded-t-[32px]' style={{ backgroundColor: colors.surface }}>
+              <View className='px-6 py-4 border-b' style={{ borderColor: colors.border }}>
                 <View className='flex-row items-center justify-between'>
-                  <Text className='text-lg font-bold text-text-primary'>{label}</Text>
+                  <Text className='text-lg font-bold' style={{ color: colors.textPrimary }}>
+                    {label}
+                  </Text>
                   <TouchableOpacity onPress={() => setIsOpen(false)}>
-                    <MaterialIcons name='close' size={24} color='#6B7280' />
+                    <MaterialIcons name='close' size={24} color={colors.textSecondary} />
                   </TouchableOpacity>
                 </View>
               </View>
@@ -129,17 +144,28 @@ export function DatePicker({
                   {!required && (
                     <TouchableOpacity
                       onPress={handleClear}
-                      className='flex-1 py-3 rounded-xl border border-gray-300'
+                      className='flex-1 py-3 rounded-xl border'
+                      style={{ borderColor: colors.border }}
                     >
-                      <Text className='text-center font-medium text-text-secondary'>Limpar</Text>
+                      <Text
+                        className='text-center font-medium'
+                        style={{ color: colors.textSecondary }}
+                      >
+                        Limpar
+                      </Text>
                     </TouchableOpacity>
                   )}
                   <TouchableOpacity
                     onPress={handleConfirm}
                     className='flex-1 py-3 rounded-xl'
-                    style={{ backgroundColor: '#7B5FFF' }}
+                    style={{ backgroundColor: colors.primary }}
                   >
-                    <Text className='text-center font-medium text-white'>Confirmar</Text>
+                    <Text
+                      className='text-center font-medium'
+                      style={{ color: colors.textOnPrimary }}
+                    >
+                      Confirmar
+                    </Text>
                   </TouchableOpacity>
                 </View>
               </View>

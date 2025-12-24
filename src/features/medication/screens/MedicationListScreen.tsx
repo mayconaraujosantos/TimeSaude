@@ -15,6 +15,7 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { MedicationStackParamList } from '@/navigation_stack/navigation/MedicationNavigator';
 import { DateSelector, DateItem } from '@/shared/components/molecules/DateSelector';
 import { useMedications } from '../hooks/useMedications';
+import { useTheme } from '@/shared/hooks/useTheme';
 import { EditMedicationModal } from '../components/EditMedicationModal';
 import { MedicationCard } from '../components/MedicationCard';
 import { MedicationListSkeleton } from '../components/MedicationCardSkeleton';
@@ -26,6 +27,7 @@ export function MedicationListScreen() {
   console.log('[MEDICATION_LIST] Component rendering - START');
 
   const navigation = useNavigation<NavigationProp>();
+  const { colors } = useTheme();
   console.log('[MEDICATION_LIST] useNavigation SUCCESS, navigation exists:', !!navigation);
 
   const { medications, loading, error, isOfflineMode, deleteMedication, refresh } =
@@ -201,32 +203,41 @@ export function MedicationListScreen() {
       </View>
 
       {/* Fixed Section Header */}
-      <View className='bg-gray-50 px-6 pt-6 pb-3'>
+      <View className='px-6 pt-6 pb-3' style={{ backgroundColor: colors.background }}>
         <View className='flex-row justify-between items-center mb-4'>
-          <Text className='text-lg font-bold text-gray-900'>Meus Medicamentos</Text>
+          <Text className='text-lg font-bold' style={{ color: colors.textPrimary }}>
+            Meus Medicamentos
+          </Text>
           <TouchableOpacity
             onPress={() => navigation.navigate('AddMedication')}
-            className='bg-primary px-4 py-2 rounded-full'
+            className='px-4 py-2 rounded-full'
+            style={{ backgroundColor: colors.primary }}
           >
-            <Text className='text-sm text-white font-semibold'>+ Adicionar</Text>
+            <Text className='text-sm font-semibold' style={{ color: colors.textOnPrimary }}>
+              + Adicionar
+            </Text>
           </TouchableOpacity>
         </View>
 
         {/* Search Bar - Fora do FlatList para evitar unmount */}
-        <View className='bg-white rounded-2xl px-4 py-3 flex-row items-center shadow-sm'>
-          <MaterialIcons name='search' size={20} color='#9CA3AF' />
+        <View
+          className='rounded-2xl px-4 py-3 flex-row items-center shadow-sm'
+          style={{ backgroundColor: colors.surface }}
+        >
+          <MaterialIcons name='search' size={20} color={colors.textSecondary} />
           <TextInput
             value={searchQuery}
             onChangeText={setSearchQuery}
             placeholder='Buscar medicamento...'
-            placeholderTextColor='#9CA3AF'
-            className='flex-1 ml-2 text-gray-900'
+            placeholderTextColor={colors.textSecondary}
+            className='flex-1 ml-2'
+            style={{ color: colors.textPrimary }}
             autoCapitalize='none'
             autoCorrect={false}
           />
           {searchQuery.length > 0 && (
             <TouchableOpacity onPress={() => setSearchQuery('')}>
-              <MaterialIcons name='close' size={20} color='#9CA3AF' />
+              <MaterialIcons name='close' size={20} color={colors.textSecondary} />
             </TouchableOpacity>
           )}
         </View>

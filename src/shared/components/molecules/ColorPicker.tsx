@@ -1,6 +1,7 @@
 import { View, Text, TouchableOpacity, Modal, ScrollView } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useState } from 'react';
+import { useTheme } from '@/shared/hooks/useTheme';
 
 const COLORS = [
   { name: 'Azul', value: '#3B82F6' },
@@ -26,26 +27,33 @@ interface ColorPickerProps {
 
 export function ColorPicker({ label, value, onSelect, required = false }: ColorPickerProps) {
   const [isOpen, setIsOpen] = useState(false);
+  const { colors } = useTheme();
 
   const selectedColor = COLORS.find(c => c.value === value) || COLORS[0]!;
 
   return (
     <View>
-      <Text className='text-sm font-medium text-text-primary mb-2'>
-        {label} {required && <Text className='text-red-500'>*</Text>}
+      <Text className='text-sm font-medium mb-2' style={{ color: colors.textPrimary }}>
+        {label} {required && <Text style={{ color: colors.error }}>*</Text>}
       </Text>
 
       <TouchableOpacity
         onPress={() => setIsOpen(true)}
-        className='bg-white rounded-xl px-4 py-3 border border-gray-200'
+        className='rounded-xl px-4 py-3 border'
+        style={{
+          backgroundColor: colors.surface,
+          borderColor: colors.border,
+        }}
       >
         <View className='flex-row items-center gap-3'>
           <View
-            className='w-8 h-8 rounded-full border-2 border-gray-200'
-            style={{ backgroundColor: value }}
+            className='w-8 h-8 rounded-full border-2'
+            style={{ backgroundColor: value, borderColor: colors.border }}
           />
-          <Text className='flex-1 text-text-primary'>{selectedColor.name}</Text>
-          <MaterialIcons name='keyboard-arrow-down' size={24} color='#9CA3AF' />
+          <Text className='flex-1' style={{ color: colors.textPrimary }}>
+            {selectedColor.name}
+          </Text>
+          <MaterialIcons name='keyboard-arrow-down' size={24} color={colors.textSecondary} />
         </View>
       </TouchableOpacity>
 
@@ -56,16 +64,19 @@ export function ColorPicker({ label, value, onSelect, required = false }: ColorP
         onRequestClose={() => setIsOpen(false)}
       >
         <TouchableOpacity
-          className='flex-1 bg-black/50 justify-end'
+          className='flex-1 justify-end'
+          style={{ backgroundColor: colors.overlay }}
           activeOpacity={1}
           onPress={() => setIsOpen(false)}
         >
-          <View className='bg-white rounded-t-[32px]'>
-            <View className='px-6 py-4 border-b border-gray-200'>
+          <View className='rounded-t-[32px]' style={{ backgroundColor: colors.surface }}>
+            <View className='px-6 py-4 border-b' style={{ borderColor: colors.border }}>
               <View className='flex-row items-center justify-between'>
-                <Text className='text-lg font-bold text-text-primary'>{label}</Text>
+                <Text className='text-lg font-bold' style={{ color: colors.textPrimary }}>
+                  {label}
+                </Text>
                 <TouchableOpacity onPress={() => setIsOpen(false)}>
-                  <MaterialIcons name='close' size={24} color='#6B7280' />
+                  <MaterialIcons name='close' size={24} color={colors.textSecondary} />
                 </TouchableOpacity>
               </View>
             </View>
@@ -87,7 +98,7 @@ export function ColorPicker({ label, value, onSelect, required = false }: ColorP
                         className='w-16 h-16 rounded-full border-2'
                         style={{
                           backgroundColor: color.value,
-                          borderColor: color.value === value ? '#1A1A1A' : '#E5E7EB',
+                          borderColor: color.value === value ? colors.textPrimary : colors.border,
                           borderWidth: color.value === value ? 3 : 2,
                         }}
                       />
@@ -97,7 +108,10 @@ export function ColorPicker({ label, value, onSelect, required = false }: ColorP
                         </View>
                       )}
                     </View>
-                    <Text className='text-xs text-text-secondary mt-2 text-center'>
+                    <Text
+                      className='text-xs mt-2 text-center'
+                      style={{ color: colors.textSecondary }}
+                    >
                       {color.name}
                     </Text>
                   </TouchableOpacity>

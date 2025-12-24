@@ -206,7 +206,6 @@ export function AddMedicationScreen() {
               }}
               placeholder='Ex: Paracetamol'
               borderRadius={20}
-              className='bg-white'
             />
             {errors.name && (
               <Text className='text-xs mt-1' style={{ color: colors.error }}>
@@ -231,7 +230,6 @@ export function AddMedicationScreen() {
                 placeholder='Ex: 500'
                 keyboardType='numeric'
                 borderRadius={20}
-                className='bg-white'
               />
               {errors.dosage && (
                 <Text className='text-xs mt-1' style={{ color: colors.error }}>
@@ -291,7 +289,6 @@ export function AddMedicationScreen() {
               onChangeText={setPurpose}
               placeholder='Ex: Controle de pressão arterial'
               borderRadius={20}
-              className='bg-white'
             />
           </View>
 
@@ -308,7 +305,6 @@ export function AddMedicationScreen() {
               }}
               placeholder='Ex: 8/8h ou 2x ao dia'
               borderRadius={20}
-              className='bg-white'
             />
             {errors.frequency && (
               <Text className='text-xs mt-1' style={{ color: colors.error }}>
@@ -411,7 +407,6 @@ export function AddMedicationScreen() {
               onChangeText={setNotes}
               placeholder='Ex: Tomar após as refeições'
               borderRadius={20}
-              className='bg-white'
               multiline={true}
               numberOfLines={3}
             />

@@ -1,4 +1,5 @@
 import { TextInput } from 'react-native';
+import { useTheme } from '@/shared/hooks/useTheme';
 
 export function Input({
   placeholder,
@@ -21,6 +22,8 @@ export function Input({
   customSize?: { padding: string; textSize: string };
   borderRadius?: number;
 } & React.ComponentProps<typeof TextInput>) {
+  const { colors } = useTheme();
+
   // Configurações de tamanho padrão
   const sizeConfig = {
     small: { padding: 'p-2', textSize: 'text-sm' },
@@ -39,8 +42,17 @@ export function Input({
       secureTextEntry={secureTextEntry}
       keyboardType={keyboardType}
       autoCapitalize={autoCapitalize}
-      className={`border border-gray-300 bg-white ${padding} ${textSize}`}
-      style={[{ borderRadius }, style]}
+      className={`border ${padding} ${textSize}`}
+      style={[
+        {
+          borderRadius,
+          borderColor: colors.border,
+          backgroundColor: colors.surface,
+          color: colors.textPrimary,
+        },
+        style,
+      ]}
+      placeholderTextColor={colors.textSecondary}
       {...props}
     />
   );
